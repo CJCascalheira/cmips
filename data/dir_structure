@@ -3,3 +3,5 @@ Data directory structure:
 data/
 ----/raw
 ----/iphub_info
+----/participants
+--------/passed_bdts

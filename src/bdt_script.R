@@ -9,6 +9,10 @@
 
 # Resources:
 # - https://psyarxiv.com/gtp6z/
+# - https://cran.r-project.org/web/packages/httr/vignettes/quickstart.html
+# - https://stackoverflow.com/questions/34045738/how-can-i-calculate-cosine-similarity-between-two-strings-vectors
+# - https://github.com/yusuzech/r-web-scraping-cheat-sheet/blob/master/README.md#rvest4
+# - https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_strings.pdf
 
 # LIBRARIES AND IMPORT DATA -----------------------------------------------
 
@@ -21,6 +25,8 @@ library(rIP)
 library(httr)
 library(iptools)
 library(gplots)
+library(lsa)
+library(rvest)
 
 # Import data
 cmips <- read_csv("data/raw/cmips_qualtrics.csv")
@@ -39,7 +45,12 @@ cmips <- cmips[-c(1:6), ] %>%
     duration = as.numeric(duration),
     # Change duration to minutes
     duration = duration / 60
-  )
+  ) %>%
+  # Organize by starting date
+  arrange(StartDate)
+
+# Check count
+nrow(cmips)
 
 # UNREASONABLE TIME AND DURATION ------------------------------------------
 
@@ -47,7 +58,32 @@ cmips <- cmips[-c(1:6), ] %>%
 cmips <- cmips %>%
   filter(duration > 5)
 
+# Check count
+nrow(cmips)
+
 # INELIGIBLE OR IMPROBABLE DEMOGRAPHICS -----------------------------------
+
+# Check for cishet folx
+cishet_folx <- cmips %>%
+  select(ResponseId, sex, gender, sex_or) %>%
+  # Cishet women
+  mutate(cishet_w = if_else(str_detect(sex, regex("female", ignore_case = TRUE)) &
+                              str_detect(gender, regex("cisgender|female", ignore_case = TRUE)) &
+                              str_detect(sex_or, regex("hetero", ignore_case = TRUE)), 1, 0)) %>%
+  # Cishet men
+  mutate(cishet_m = if_else(str_detect(sex, regex("^male", ignore_case = TRUE)) &
+                              str_detect(gender, regex("cisgender|male", ignore_case = TRUE)) &
+                              str_detect(sex_or, regex("hetero", ignore_case = TRUE)), 1, 0)) %>%
+  # Identify cishet people
+  filter(cishet_m == 1 | cishet_w == 1) %>%
+  pull(ResponseId)
+
+# Remove cishet folx
+cmips <- cmips %>% 
+  filter(!(ResponseId %in% cishet_folx))
+
+# Check count
+nrow(cmips)
 
 # ATTENTION CHECKS --------------------------------------------------------
 
@@ -59,12 +95,18 @@ cmips <- cmips %>%
     IHS_8 == "Often"
   )
 
+# Check count
+nrow(cmips)
+
 # INCONSISTENT ITEM RESPONSE ----------------------------------------------
 
 # Check for inconsistency in key survey items
 cmips <- cmips %>%
   # Keep respondents if their ZIP codes match
   filter(zipcode1 == zipcode2)
+
+# Check count
+nrow(cmips)
 
 # ANAGRAMS ----------------------------------------------------------------
 
@@ -83,7 +125,183 @@ cmips <- cmips %>%
     anagram3 == "happy"
   )
 
+# Check count
+nrow(cmips)
+
+# SUSPICIOUS QUALITATIVE DATA ---------------------------------------------
+
+# ...1) Duplicated Qual Responses -----------------------------------------
+
+# Get duplicated qualitative responses 
+dupes_goal <- cmips %>% 
+  # Select item with qualitative data
+  select(ResponseId, goal) %>%
+  # Remove NA values
+  filter(!is.na(goal)) %>%
+  # Covert to lower
+  mutate(goal = tolower(goal)) %>%
+  # Remove common words
+  filter(!goal %in% c("no", "none", "good", "n/a", "nothing", "thank you", "thanks")) %>%
+  get_dupes(goal) %>%
+  pull(ResponseId)
+
+# Get duplicated qualitative responses 
+dupes_fdbk1 <- cmips %>% 
+  # Select item with qualitative data
+  select(ResponseId, feedback_gen) %>%
+  # Remove NA values
+  filter(!is.na(feedback_gen)) %>%
+  # Covert to lower
+  mutate(feedback_gen = tolower(feedback_gen)) %>%
+  # Remove common words
+  filter(!feedback_gen %in% c("no", "none", "good", "n/a", "nothing", "thank you", "thanks")) %>%
+  get_dupes(feedback_gen) %>%
+  pull(ResponseId)
+
+# Get duplicated qualitative responses 
+dupes_fdbk2 <- cmips %>% 
+  # Select item with qualitative data
+  select(ResponseId, feedback_sm) %>%
+  # Remove NA values
+  filter(!is.na(feedback_sm)) %>%
+  # Covert to lower
+  mutate(feedback_sm = tolower(feedback_sm)) %>%
+  # Remove common words
+  filter(!feedback_sm %in% c("no", "none", "good", "n/a", "nothing", "thank you", "thanks")) %>%
+  get_dupes(feedback_sm) %>%
+  pull(ResponseId)
+
+# Combine all duplicated responses
+all_dupes <- c(dupes_goal, dupes_fdbk1, dupes_fdbk2)
+
+# Remove respondents with duplicated responses
+cmips <- cmips %>%
+  filter(!(ResponseId %in% all_dupes))
+
+# Check count
+nrow(cmips)
+
+# ...2) Cosine Similarity -------------------------------------------------
+
+# Prepare document for cosine similarity
+goals <- cmips %>% 
+  # Select item with qualitative data
+  select(ResponseId, goal) %>%
+  # Remove NA
+  filter(!is.na(goal))
+
+# Create temp files
+tdm_goals = tempfile()
+dir.create(tdm_goals)
+
+# Loop over each response
+for (i in 1:nrow(goals)) {
+  write(goals$goal[i], 
+        file = paste(tdm_goals, goals$ResponseId[i], sep="/")) 
+}
+
+# Create a document-term matrix
+tdm_goals <- textmatrix(tdm_goals, minWordLength=1)
+
+# Prepare document for cosine similarity
+fdbk1 <- cmips %>% 
+  # Select item with qualitative data
+  select(ResponseId, feedback_gen) %>%
+  # Remove NA
+  filter(!is.na(feedback_gen))
+
+# Create temp files
+tdm_fdbk1 = tempfile()
+dir.create(tdm_fdbk1)
+
+# Loop over each response
+for (i in 1:nrow(fdbk1)) {
+  write(fdbk1$feedback_gen[i], 
+        file = paste(tdm_fdbk1, fdbk1$ResponseId[i], sep="/")) 
+}
+
+# Create a document-term matrix
+tdm_fdbk1 <- textmatrix(tdm_fdbk1, minWordLength=1)
+
+# Prepare document for cosine similarity
+fdbk2 <- cmips %>% 
+  # Select item with qualitative data
+  select(ResponseId, feedback_sm) %>%
+  # Remove NA
+  filter(!is.na(feedback_sm))
+
+# Create temp files
+tdm_fdbk2 = tempfile()
+dir.create(tdm_fdbk2)
+
+# Loop over each response
+for (i in 1:nrow(fdbk2)) {
+  write(fdbk2$feedback_sm[i], 
+        file = paste(tdm_fdbk2, fdbk2$ResponseId[i], sep="/")) 
+}
+
+# Create a document-term matrix
+tdm_fdbk2 <- textmatrix(tdm_fdbk2, minWordLength=1)
+
+# Calculate cosine similarity
+cosine_goals <- cosine(tdm_goals)
+cosine_fdbk1 <- cosine(tdm_fdbk1)
+cosine_fdbk2 <- cosine(tdm_fdbk2) 
+
+# Find respondents with high cosine similarity
+
+# Goals
+high_cos1 <- as.data.frame(cosine_goals) %>%
+  # Convert to long format
+  pivot_longer(cols = everything(), 
+               names_to = "ResponseId", 
+               values_to = "cos") %>%
+  # Remove perfect similarity
+  filter(cos != 1) %>%
+  # Detect respondents with cos_similarity >= .80
+  filter(cos >= .80) %>%
+  distinct(ResponseId) %>%
+  pull(ResponseId)
+
+# Feedback general
+high_cos2 <- as.data.frame(cosine_fdbk1) %>%
+  # Convert to long format
+  pivot_longer(cols = everything(), 
+               names_to = "ResponseId", 
+               values_to = "cos") %>%
+  # Remove perfect similarity
+  filter(cos != 1) %>%
+  # Detect respondents with cos_similarity >= .80
+  filter(cos >= .80) %>%
+  distinct(ResponseId) %>%
+  pull(ResponseId)
+
+# Feedback social media
+high_cos3 <- as.data.frame(cosine_fdbk2) %>%
+  # Convert to long format
+  pivot_longer(cols = everything(), 
+               names_to = "ResponseId", 
+               values_to = "cos") %>%
+  # Remove perfect similarity
+  filter(cos != 1) %>%
+  # Detect respondents with cos_similarity >= .80
+  filter(cos >= .80) %>%
+  distinct(ResponseId) %>%
+  pull(ResponseId)
+
+# Combine
+high_cosine_sim <- c(high_cos1, high_cos2, high_cos3)
+
+# Remove respondents with high cosine similarity
+cmips <- cmips %>%
+  filter(!(ResponseId %in% high_cosine_sim))
+
+# Check count
+nrow(cmips)
+
 # IP ADDRESS FRAUD CHECK --------------------------------------------------
+
+# ...1) IP Hub ------------------------------------------------------------
 
 # Select just IP address
 cmips_ip_address <- cmips %>%
@@ -108,3 +326,54 @@ iphub_keep <- iphub_info %>%
 # Filter respondents to keep
 cmips <- cmips %>%
   filter(IPAddress %in% iphub_keep)
+
+# Check count
+nrow(cmips)
+
+# ...2) Scamalytics -------------------------------------------------------
+
+# Initialize an empty vector
+risk_level_vector <- c()
+
+# For each respondent in the dataframe
+for (i in 1:nrow(cmips)) {
+  
+  # Get the Scamalytics page for their URL
+  my_url <- paste0("https://scamalytics.com/ip/", cmips$IPAddress[i])
+  
+  # Extract the HTML element corresponding to their risk category
+  response <- read_html(my_url)
+  div_header <- html_elements(response, xpath = '/html/body/div[3]/div[1]')
+  
+  # Get the risk category from the HTML element
+  risk_level <- str_extract(as.character(div_header), regex("\\w+ Risk", ignore_case = TRUE))
+  
+  # Save the risk category to a vector
+  risk_level_vector <- c(risk_level_vector, risk_level) 
+}
+
+# Find risky respondents
+risky_scamalytics_ids <- cmips %>%
+  # Add the risk levels to the response IDs
+  select(ResponseId) %>%
+  mutate(scamalytics_risk = risk_level_vector) %>%
+  # Find respondents with high or very high risk
+  filter(scamalytics_risk %in% c("High Risk", "Very High Risk")) %>%
+  pull(ResponseId)
+
+# Remove the risky Scamalytics IDs from the data
+cmips <- cmips %>%
+  filter(!(ResponseId %in% risky_scamalytics_ids))
+
+# Check count
+nrow(cmips)
+
+# SAVE CLEANED DATA -------------------------------------------------------
+
+# Filter the data needed for initial enrollment data set
+passed_bdts <- cmips %>%
+  select(StartDate, ResponseId, name, email, phone)
+print(passed_bdts)
+
+# Save the data
+write_csv(passed_bdts, "data/participants/passed_bdts/passed_bdts_03.06.2023.csv")
