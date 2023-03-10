@@ -27,6 +27,7 @@ library(iptools)
 library(gplots)
 library(lsa)
 library(rvest)
+source("/util/botifyr/")
 
 # Import data
 cmips <- read_csv("data/raw/cmips_qualtrics.csv")
@@ -49,8 +50,21 @@ cmips <- cmips[-c(1:6), ] %>%
   # Organize by starting date
   arrange(StartDate)
 
+# Set biweekly start
+time_start <- ymd_hms("2023-02-22 00:00:00")
+
+# Set biweekly end
+time_end <- ymd_hms("2023-03-08 23:59:59")
+
+# Select respondents who took the survey over the last two weeks
+new_survey <- survey %>%
+  filter(StartDate > time_start & StartDate < time_end)
+
 # Check count
 nrow(cmips)
+
+# Import previous cohort
+read_csv()
 
 # UNREASONABLE TIME AND DURATION ------------------------------------------
 
@@ -313,10 +327,10 @@ cmips_ip_address <- cmips %>%
 iphub_info <- getIPinfo(cmips_ip_address, "IPAddress", iphub_key = Sys.getenv("IPHUB_KEY"))
 
 # Export the IP info
-write_csv(iphub_info, file = "data/iphub_info/iphub_info_03.06.23.csv")
+write_csv(iphub_info, file = "data/iphub_info/iphub_info_03.10.23.csv")
 
 # Import the IP info
-iphub_info <- read_csv("data/iphub_info/iphub_info_03.06.23.csv")
+iphub_info <- read_csv("data/iphub_info/iphub_info_03.10.23.csv")
 
 # Keep respondents not recommended to block
 iphub_keep <- iphub_info %>%
@@ -372,8 +386,15 @@ nrow(cmips)
 
 # Filter the data needed for initial enrollment data set
 passed_bdts <- cmips %>%
-  select(StartDate, ResponseId, name, email, phone)
+  select(StartDate, ResponseId, name, email, phone, has_fbtw) %>%
+  mutate(
+    SM_Account = str_extract(has_fbtw, 
+                             regex("Twitter and a Facebook|Facebook|Twitter")),
+    SM_Account = if_else(str_detect(SM_Account, "Twitter and a Facebook"), 
+                         "Both", SM_Account)
+  ) %>%
+  select(-has_fbtw)
 print(passed_bdts)
 
 # Save the data
-write_csv(passed_bdts, "data/participants/passed_bdts/passed_bdts_03.06.2023.csv")
+write_csv(passed_bdts, "data/participants/passed_bdts/passed_bdts_03.10.23.csv")
