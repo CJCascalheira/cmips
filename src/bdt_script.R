@@ -27,7 +27,10 @@ library(iptools)
 library(gplots)
 library(lsa)
 library(rvest)
-source("/util/botifyr/")
+
+# Load botifyR functions
+source("util/botifyr/missing_data.R")
+source("util/botifyr/attention_checks.R")
 
 # Import data
 cmips <- read_csv("data/raw/cmips_qualtrics.csv")
@@ -51,20 +54,39 @@ cmips <- cmips[-c(1:6), ] %>%
   arrange(StartDate)
 
 # Set biweekly start
-time_start <- ymd_hms("2023-02-22 00:00:00")
+time_start <- ymd_hms("2023-03-06 00:00:00")
 
 # Set biweekly end
-time_end <- ymd_hms("2023-03-08 23:59:59")
+time_end <- ymd_hms("2023-03-10 23:59:59")
 
-# Select respondents who took the survey over the last two weeks
-new_survey <- survey %>%
+# Select respondents who took the survey over the last BDT check period
+cmips <- cmips %>%
   filter(StartDate > time_start & StartDate < time_end)
 
 # Check count
 nrow(cmips)
 
 # Import previous cohort
-read_csv()
+passed_bdts_03.06.23 <- read_csv("data/participants/passed_bdts/passed_bdts_03.06.23.csv")
+
+# Combined the previously enrolled participants
+previously_enrolled <- c(passed_bdts_03.06.23$email)
+
+# Remove any previously enrolled participants
+cmips <- cmips %>% 
+  filter(!(email %in% previously_enrolled))
+
+# Check count
+nrow(cmips)
+
+# MISSING DATA ------------------------------------------------------------
+
+# Remove respondents with >= 75% missing data
+# Keep people with missing data? NO
+cmips <- missing_data(cmips, "ResponseId", missing = .75, keep = FALSE)
+
+# Check count
+nrow(cmips)
 
 # UNREASONABLE TIME AND DURATION ------------------------------------------
 
@@ -101,13 +123,11 @@ nrow(cmips)
 
 # ATTENTION CHECKS --------------------------------------------------------
 
-# Ensure participant followed all attention checks
-cmips <- cmips %>%
-  filter(
-    BSMAS_4 == "Sometimes",
-    LEC1_9 == "Learned about it",
-    IHS_8 == "Often"
-  )
+# Ensure participant are missing no more than 2 attention checks
+cmips <- attention_checks(cmips,
+                 vars = c("BSMAS_4", "LEC1_9", "IHS_8"),
+                 correct_answers = c("Sometimes", "Learned about it", "Often"),
+                 threshold = 2)
 
 # Check count
 nrow(cmips)
