@@ -7,6 +7,9 @@
 # on the data from the Qualtrics survey, which is the survey posted on the 
 # Internet as an anonymous link.
 
+# If you use any of this code in your project, please remember to cite this 
+# script; please use this paper for citation purposes: https://psyarxiv.com/gtp6z/
+
 # Resources:
 # - https://psyarxiv.com/gtp6z/
 # - https://cran.r-project.org/web/packages/httr/vignettes/quickstart.html
@@ -53,33 +56,114 @@ cmips <- cmips[-c(1:6), ] %>%
   # Organize by starting date
   arrange(StartDate)
 
-# Set biweekly start
-time_start <- ymd_hms("2023-03-06 00:00:00")
-
-# Set biweekly end
-time_end <- ymd_hms("2023-03-10 23:59:59")
-
-# Select respondents who took the survey over the last BDT check period
-cmips <- cmips %>%
-  filter(StartDate > time_start & StartDate < time_end)
+# This script is tailored to a data collection project, CMIPS, where we assess
+# for the presence of bots on a weekly basis. Every few days, we run this script
+# to see which respondents are reasonably human and, thus, and are ready for the 
+# next phase of the project. If you wish to keep this format, you will need
+# to change the dates each time you run the script. 
 
 # Check count
 nrow(cmips)
 
 # Import previous cohort
+# These are the cohorts of respondents who passed all the bot detection tactics
+# (BDTs) during the previous sessions in which we ran this script. Each week,
+# you will need to add the new cohort here.
 passed_bdts_03.06.23 <- read_csv("data/participants/passed_bdts/passed_bdts_03.06.23.csv")
+passed_bdts_03.10.23 <- read_csv("data/participants/passed_bdts/passed_bdts_03.10.23.csv")
+passed_bdts_03.14.23 <- read_csv("data/participants/passed_bdts/passed_bdts_03.14.23.csv")
+passed_bdts_03.17.23 <- read_csv("data/participants/passed_bdts/passed_bdts_03.17.23.csv")
+passed_bdts_03.21.23 <- read_csv("data/participants/passed_bdts/passed_bdts_03.21.23.csv")
+passed_bdts_03.24.23 <- read_csv("data/participants/passed_bdts/passed_bdts_03.24.23.csv")
+passed_bdts_03.27.23 <- read_csv("data/participants/passed_bdts/passed_bdts_03.27.23.csv")
+passed_bdts_03.31.23 <- read_csv("data/participants/passed_bdts/passed_bdts_03.31.23.csv")
+passed_bdts_04.02.23 <- read_csv("data/participants/passed_bdts/passed_bdts_04.02.23.csv")
+passed_bdts_04.07.23 <- read_csv("data/participants/passed_bdts/passed_bdts_04.07.23.csv")
+passed_bdts_04.11.23 <- read_csv("data/participants/passed_bdts/passed_bdts_04.11.23.csv")
+passed_bdts_04.18.23 <- read_csv("data/participants/passed_bdts/passed_bdts_04.18.23.csv")
+passed_bdts_04.21.23 <- read_csv("data/participants/passed_bdts/passed_bdts_04.21.23.csv")
+passed_bdts_04.25.23 <- read_csv("data/participants/passed_bdts/passed_bdts_04.25.23.csv")
+passed_bdts_04.28.23 <- read_csv("data/participants/passed_bdts/passed_bdts_04.28.23.csv")
+passed_bdts_05.02.23 <- read_csv("data/participants/passed_bdts/passed_bdts_05.02.23.csv")
+passed_bdts_05.05.23 <- read_csv("data/participants/passed_bdts/passed_bdts_05.05.23.csv")
+passed_bdts_05.09.23 <- read_csv("data/participants/passed_bdts/passed_bdts_05.09.23.csv")
+# None enrolled on 05.12.23
+passed_bdts_05.16.23 <- read_csv("data/participants/passed_bdts/passed_bdts_05.16.23.csv")
+passed_bdts_05.19.23 <- read_csv("data/participants/passed_bdts/passed_bdts_05.19.23.csv")
+passed_bdts_05.31.23 <- read_csv("data/participants/passed_bdts/passed_bdts_05.31.23.csv")
+passed_bdts_06.05.23 <- read_csv("data/participants/passed_bdts/passed_bdts_06.05.23.csv")
+passed_bdts_06.11.23 <- read_csv("data/participants/passed_bdts/passed_bdts_06.11.23.csv")
+# None enrolled on 06.16.23
+passed_bdts_06.20.23 <- read_csv("data/participants/passed_bdts/passed_bdts_06.20.23.csv")
+passed_bdts_06.23.23 <- read_csv("data/participants/passed_bdts/passed_bdts_06.23.23.csv")
+passed_bdts_06.26.23 <- read_csv("data/participants/passed_bdts/passed_bdts_06.26.23.csv")
+passed_bdts_06.30.23 <- read_csv("data/participants/passed_bdts/passed_bdts_06.30.23.csv")
+passed_bdts_07.04.23 <- read_csv("data/participants/passed_bdts/passed_bdts_07.04.23.csv")
+passed_bdts_07.07.23 <- read_csv("data/participants/passed_bdts/passed_bdts_07.07.23.csv")
+passed_bdts_07.11.23 <- read_csv("data/participants/passed_bdts/passed_bdts_07.11.23.csv")
+passed_bdts_07.19.23 <- read_csv("data/participants/passed_bdts/passed_bdts_07.19.23.csv")
+passed_bdts_07.26.23 <- read_csv("data/participants/passed_bdts/passed_bdts_07.26.23.csv")
+passed_bdts_07.30.23 <- read_csv("data/participants/passed_bdts/passed_bdts_07.30.23.csv")
+passed_bdts_08.02.23 <- read_csv("data/participants/passed_bdts/passed_bdts_08.02.23.csv")
+passed_bdts_08.08.23 <- read_csv("data/participants/passed_bdts/passed_bdts_08.08.23.csv")
+# Data collection paused due to IRB oversight 08.10.23
+passed_bdts_09.02.23 <- read_csv("data/participants/passed_bdts/passed_bdts_09.02.23.csv")
+passed_bdts_09.10.23 <- read_csv("data/participants/passed_bdts/passed_bdts_09.10.23.csv")
+passed_bdts_09.17.23 <- read_csv("data/participants/passed_bdts/passed_bdts_09.17.23.csv")
+passed_bdts_10.01.23 <- read_csv("data/participants/passed_bdts/passed_bdts_10.01.23.csv")
+passed_bdts_10.09.23 <- read_csv("data/participants/passed_bdts/passed_bdts_10.09.23.csv")
+passed_bdts_10.14.23 <- read_csv("data/participants/passed_bdts/passed_bdts_10.14.23.csv")
+# None enrolled on 10.22.23
+passed_bdts_10.31.23 <- read_csv("data/participants/passed_bdts/passed_bdts_10.31.23.csv")
+passed_bdts_11.18.23 <- read_csv("data/participants/passed_bdts/passed_bdts_11.18.23.csv")
+passed_bdts_12.01.23 <- read_csv("data/participants/passed_bdts/passed_bdts_12.01.23.csv")
+# None enrolled on 12.13.23
+passed_bdts_12.20.23 <- read_csv("data/participants/passed_bdts/passed_bdts_12.20.23.csv")
+passed_bdts_01.02.24 <- read_csv("data/participants/passed_bdts/passed_bdts_01.02.24.csv")
+passed_bdts_01.11.24 <- read_csv("data/participants/passed_bdts/passed_bdts_01.11.24.csv")
+passed_bdts_01.27.24 <- read_csv("data/participants/passed_bdts/passed_bdts_01.27.24.csv")
+passed_bdts_02.12.24 <- read_csv("data/participants/passed_bdts/passed_bdts_02.12.24.csv")
 
 # Combined the previously enrolled participants
-previously_enrolled <- c(passed_bdts_03.06.23$email)
+# You also need to add the cohort here.
+previously_enrolled <- c(passed_bdts_03.06.23$email, passed_bdts_03.10.23$email,
+                         passed_bdts_03.14.23$email, passed_bdts_03.17.23$email,
+                         passed_bdts_03.21.23$email, passed_bdts_03.24.23$email,
+                         passed_bdts_03.27.23$email, passed_bdts_03.31.23$email,
+                         passed_bdts_04.02.23$email, passed_bdts_04.07.23$email,
+                         passed_bdts_04.11.23$email, passed_bdts_04.18.23$email,
+                         passed_bdts_04.21.23$email, passed_bdts_04.25.23$email,
+                         passed_bdts_04.28.23$email, passed_bdts_05.02.23$email,
+                         passed_bdts_05.05.23$email, passed_bdts_05.09.23$email,
+                         passed_bdts_05.16.23$email, passed_bdts_05.19.23$email,
+                         passed_bdts_05.31.23$email, passed_bdts_06.05.23$email,
+                         passed_bdts_06.11.23$email, passed_bdts_06.20.23$email,
+                         passed_bdts_06.23.23$email, passed_bdts_06.26.23$email, 
+                         passed_bdts_06.30.23$email, passed_bdts_07.04.23$email,
+                         passed_bdts_07.07.23$email, passed_bdts_07.11.23$email,
+                         passed_bdts_07.19.23$email, passed_bdts_07.26.23$email,
+                         passed_bdts_08.02.23$email, passed_bdts_08.08.23$email,
+                         passed_bdts_09.02.23$email, passed_bdts_09.10.23$email,
+                         passed_bdts_09.17.23$email, passed_bdts_10.01.23$email,
+                         passed_bdts_10.09.23$email, passed_bdts_10.14.23$email,
+                         passed_bdts_10.31.23$email, passed_bdts_11.18.23$email,
+                         passed_bdts_12.01.23$email, passed_bdts_12.20.23$email,
+                         passed_bdts_01.02.24$email, passed_bdts_01.11.24$email,
+                         passed_bdts_01.27.24$email, passed_bdts_02.12.24$email)
 
 # Remove any previously enrolled participants
 cmips <- cmips %>% 
   filter(!(email %in% previously_enrolled))
 
-# Check count
+# Check count - 2866
 nrow(cmips)
 
 # MISSING DATA ------------------------------------------------------------
+
+# This code will remove respondents who have >= 75% missing data. You need to
+# replace "ResponseId" with whatever the unique identifier is for each
+# respondent in your survey. If using Qualtrics, there is no need to change
+# anything.
 
 # Remove respondents with >= 75% missing data
 # Keep people with missing data? NO
@@ -90,6 +174,10 @@ nrow(cmips)
 
 # UNREASONABLE TIME AND DURATION ------------------------------------------
 
+# Change the duration that fits your study. For example, if you think it is
+# impossible for real participants to take your 60-min survey in 30 mins, then
+# change `duration > 5` to `duration > 35`
+
 # Remove respondents with a duration <= 5 mins
 cmips <- cmips %>%
   filter(duration > 5)
@@ -99,7 +187,10 @@ nrow(cmips)
 
 # INELIGIBLE OR IMPROBABLE DEMOGRAPHICS -----------------------------------
 
-# Check for cishet folx
+# You will need to customize this code to fit your demographic criteria.
+# You can also delete this code without jeopardizing the rest of the script.
+
+# Check for cishet folx so we can remove them (i.e., ineligible)
 cishet_folx <- cmips %>%
   select(ResponseId, sex, gender, sex_or) %>%
   # Cishet women
@@ -125,14 +216,21 @@ nrow(cmips)
 
 # Ensure participant are missing no more than 2 attention checks
 cmips <- attention_checks(cmips,
-                 vars = c("BSMAS_4", "LEC1_9", "IHS_8"),
+                 # Specify the variables that serve as attention checks
+                 vars = c("BSMAS_4", "LEC1_9", "IHS_8"), 
+                 # Match each variable to the correct answer
                  correct_answers = c("Sometimes", "Learned about it", "Often"),
+                 # How many attention checks do respondents need to fail in
+                 # order to be removed?
                  threshold = 2)
 
 # Check count
 nrow(cmips)
 
 # INCONSISTENT ITEM RESPONSE ----------------------------------------------
+
+# If you have identical items in your survey (e.g., at the beginning and at the 
+# end of the survey), use this code to check if the items match.
 
 # Check for inconsistency in key survey items
 cmips <- cmips %>%
@@ -143,6 +241,13 @@ cmips <- cmips %>%
 nrow(cmips)
 
 # ANAGRAMS ----------------------------------------------------------------
+
+# Use this code if you added anagrams to your survey. Melissa Simone and I
+# have a paper coming out that shows how anagrams are highly effective at
+# removing suspected bots.
+
+# Alternatively, you can safely delete this code without affecting the rest of
+# the script.
 
 # Check for correct anagram response
 cmips <- cmips %>%
@@ -166,10 +271,17 @@ nrow(cmips)
 
 # ...1) Duplicated Qual Responses -----------------------------------------
 
+# Check for duplicated qualitative responses and remove them. You will need to
+# change the qualitative variables to match the qualitative data in your survey.
+
+# Alternatively, you can safely delete this code without affecting the rest of
+# the script.
+
 # Get duplicated qualitative responses 
 dupes_goal <- cmips %>% 
   # Select item with qualitative data
-  select(ResponseId, goal) %>%
+  # Change these variables to match your unique identifier and qualitative item
+  select(ResponseId, goal) %>% 
   # Remove NA values
   filter(!is.na(goal)) %>%
   # Covert to lower
@@ -182,31 +294,44 @@ dupes_goal <- cmips %>%
 # Get duplicated qualitative responses 
 dupes_fdbk1 <- cmips %>% 
   # Select item with qualitative data
+  # Change these variables to match your unique identifier and qualitative item
   select(ResponseId, feedback_gen) %>%
   # Remove NA values
   filter(!is.na(feedback_gen)) %>%
   # Covert to lower
   mutate(feedback_gen = tolower(feedback_gen)) %>%
   # Remove common words
-  filter(!feedback_gen %in% c("no", "none", "good", "n/a", "nothing", "thank you", "thanks")) %>%
+  filter(!feedback_gen %in% c("no", "none", "good", "n/a", "nothing", "thank you", "thanks", "No suggestions",
+                              "Na")) %>%
   get_dupes(feedback_gen) %>%
   pull(ResponseId)
 
 # Get duplicated qualitative responses 
 dupes_fdbk2 <- cmips %>% 
   # Select item with qualitative data
+  # Change these variables to match your unique identifier and qualitative item
   select(ResponseId, feedback_sm) %>%
   # Remove NA values
   filter(!is.na(feedback_sm)) %>%
   # Covert to lower
   mutate(feedback_sm = tolower(feedback_sm)) %>%
   # Remove common words
-  filter(!feedback_sm %in% c("no", "none", "good", "n/a", "nothing", "thank you", "thanks")) %>%
+  filter(!feedback_sm %in% c("no", "none", "good", "n/a", "nothing", "thank you", "thanks", "No suggestions", 
+                             "Na")) %>%
   get_dupes(feedback_sm) %>%
   pull(ResponseId)
 
 # Combine all duplicated responses
 all_dupes <- c(dupes_goal, dupes_fdbk1, dupes_fdbk2)
+
+# Keep respondents with reasonable responses
+all_dupes <- str_remove(all_dupes, "R_10ugXC5xer4Gyn1")
+all_dupes <- str_remove(all_dupes, "R_bE4odaZNISbUre1")
+
+# Show the dupes before removing; n = 9
+cmips %>%
+  filter((ResponseId %in% all_dupes)) %>%
+  select(StartDate, ResponseId, goal, feedback_gen, feedback_sm)
 
 # Remove respondents with duplicated responses
 cmips <- cmips %>%
@@ -217,10 +342,21 @@ nrow(cmips)
 
 # ...2) Cosine Similarity -------------------------------------------------
 
+# Check for qualitative responses that are very similar
+
+# NOTE: this code requires personalization. For example, if you have a variable
+# named `qual_1`, you would need to replace all instances of the word `goal` in
+# this script with `qual_1`. Repeat this process with `feedback_gen` and
+# `feedback_sm`
+
 # Prepare document for cosine similarity
 goals <- cmips %>% 
   # Select item with qualitative data
   select(ResponseId, goal) %>%
+  # Remove people who may be writing the correct goals
+  mutate(correct_goal = if_else(str_detect(goal, regex("artificial intelligence", ignore_case = TRUE)), 1, 0)) %>%
+  filter(correct_goal == 0) %>%
+  select(-correct_goal) %>%
   # Remove NA
   filter(!is.na(goal))
 
@@ -325,6 +461,12 @@ high_cos3 <- as.data.frame(cosine_fdbk2) %>%
 
 # Combine
 high_cosine_sim <- c(high_cos1, high_cos2, high_cos3)
+high_cosine_sim
+
+# Show people with high cosine similarity; n = 8
+cmips %>%
+  filter((ResponseId %in% high_cosine_sim)) %>%
+  select(StartDate, goal, feedback_gen, feedback_sm)
 
 # Remove respondents with high cosine similarity
 cmips <- cmips %>%
@@ -337,6 +479,11 @@ nrow(cmips)
 
 # ...1) IP Hub ------------------------------------------------------------
 
+# To use this code to check for international IP addresses and IP addresses
+# in a fraud database, you need to sign up for: https://iphub.info/
+
+# After you sign up, replace IPHUB_KEY with your unique key
+
 # Select just IP address
 cmips_ip_address <- cmips %>%
   select(email, IPAddress) %>%
@@ -346,18 +493,19 @@ cmips_ip_address <- cmips %>%
 # Get the IP address info from IP Hub
 iphub_info <- getIPinfo(cmips_ip_address, "IPAddress", iphub_key = Sys.getenv("IPHUB_KEY"))
 
-# Export the IP info
-write_csv(iphub_info, file = "data/iphub_info/iphub_info_03.10.23.csv")
-
-# Import the IP info
-iphub_info <- read_csv("data/iphub_info/iphub_info_03.10.23.csv")
+# CHOOSE ONE OR THE OTHER BELOW FILTER OPERATION, NOT BOTH
 
 # Keep respondents not recommended to block
-iphub_keep <- iphub_info %>%
-  filter(IP_Hub_recommend_block != 1) %>%
-  pull(IPAddress)
+#iphub_keep <- iphub_info %>%
+#  filter(IP_Hub_recommend_block != 1) %>%
+#  pull(IPAddress)
+#cmips <- cmips %>%
+#  filter(IPAddress %in% iphub_keep)
 
-# Filter respondents to keep
+# Filter out non-USA
+iphub_keep <- iphub_info %>%
+  filter(IP_Hub_nonUSIP != 1) %>%
+  pull(IPAddress)
 cmips <- cmips %>%
   filter(IPAddress %in% iphub_keep)
 
@@ -366,11 +514,17 @@ nrow(cmips)
 
 # ...2) Scamalytics -------------------------------------------------------
 
+# Check respondent IP addresses with a free-to-use fraud service.
+
 # Initialize an empty vector
 risk_level_vector <- c()
+scam_done <- c()
 
 # For each respondent in the dataframe
 for (i in 1:nrow(cmips)) {
+  
+  # Count the iteration
+  scam_done <- c(scam_done, 1)
   
   # Get the Scamalytics page for their URL
   my_url <- paste0("https://scamalytics.com/ip/", cmips$IPAddress[i])
@@ -384,6 +538,9 @@ for (i in 1:nrow(cmips)) {
   
   # Save the risk category to a vector
   risk_level_vector <- c(risk_level_vector, risk_level) 
+  
+  # Get progress
+  print(paste0("Scamalytics progress: ", round((sum(scam_done) / nrow(cmips)) * 100), "% ", "done"))
 }
 
 # Find risky respondents
@@ -391,9 +548,10 @@ risky_scamalytics_ids <- cmips %>%
   # Add the risk levels to the response IDs
   select(ResponseId) %>%
   mutate(scamalytics_risk = risk_level_vector) %>%
-  # Find respondents with high or very high risk
+  # Find respondents with very high risk
   filter(scamalytics_risk %in% c("High Risk", "Very High Risk")) %>%
   pull(ResponseId)
+length(risky_scamalytics_ids)
 
 # Remove the risky Scamalytics IDs from the data
 cmips <- cmips %>%
@@ -404,17 +562,23 @@ nrow(cmips)
 
 # SAVE CLEANED DATA -------------------------------------------------------
 
+# Export your data into a CSV file. These respondents are reasonably human.
+# However, we recommend that you now contact each of them by phone to ensure
+# they are not fraudulent (i.e., humans that do not qualify for your study,
+# but snuck in and were not detected by our BDTs)
+
 # Filter the data needed for initial enrollment data set
 passed_bdts <- cmips %>%
-  select(StartDate, ResponseId, name, email, phone, has_fbtw) %>%
+  select(StartDate, ResponseId, name, email, phone, has_fbtw, profile_fb, profile_tw) %>%
   mutate(
     SM_Account = str_extract(has_fbtw, 
                              regex("Twitter and a Facebook|Facebook|Twitter")),
     SM_Account = if_else(str_detect(SM_Account, "Twitter and a Facebook"), 
                          "Both", SM_Account)
   ) %>%
-  select(-has_fbtw)
+  select(-has_fbtw) %>%
+  select(StartDate, ResponseId, name, email, phone, SM_Account, everything())
 print(passed_bdts)
 
 # Save the data
-write_csv(passed_bdts, "data/participants/passed_bdts/passed_bdts_03.10.23.csv")
+write_csv(passed_bdts, "data/participants/passed_bdts/passed_bdts_03.04.24.csv")
