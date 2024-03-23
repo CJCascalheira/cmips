@@ -10,6 +10,11 @@ If you use the bot detection tactics (BDTs) in your work, please cite the corres
 
 ## Order of Script Exection
 
+**Clean and Preprocess**
 1. src/bdt_script.R
 2. src/clean/clean_qualtrics.R
-3. src/analyze/feasibility_consort.R
+3. src/clean/clean_strain.R
+4. src/clean/combine_dichotomize.R
+
+**Analyze**
+5. src/analyze/feasibility_consort.R

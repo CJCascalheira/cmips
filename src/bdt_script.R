@@ -123,6 +123,7 @@ passed_bdts_01.02.24 <- read_csv("data/participants/passed_bdts/passed_bdts_01.0
 passed_bdts_01.11.24 <- read_csv("data/participants/passed_bdts/passed_bdts_01.11.24.csv")
 passed_bdts_01.27.24 <- read_csv("data/participants/passed_bdts/passed_bdts_01.27.24.csv")
 passed_bdts_02.12.24 <- read_csv("data/participants/passed_bdts/passed_bdts_02.12.24.csv")
+passed_bdts_03.04.24 <- read_csv("data/participants/passed_bdts/passed_bdts_03.04.24.csv")
 
 # Combined the previously enrolled participants
 # You also need to add the cohort here.
@@ -149,13 +150,14 @@ previously_enrolled <- c(passed_bdts_03.06.23$email, passed_bdts_03.10.23$email,
                          passed_bdts_10.31.23$email, passed_bdts_11.18.23$email,
                          passed_bdts_12.01.23$email, passed_bdts_12.20.23$email,
                          passed_bdts_01.02.24$email, passed_bdts_01.11.24$email,
-                         passed_bdts_01.27.24$email, passed_bdts_02.12.24$email)
+                         passed_bdts_01.27.24$email, passed_bdts_02.12.24$email,
+                         passed_bdts_03.04.24$email)
 
 # Remove any previously enrolled participants
 cmips <- cmips %>% 
   filter(!(email %in% previously_enrolled))
 
-# Check count - 2866
+# Check count - 2887
 nrow(cmips)
 
 # MISSING DATA ------------------------------------------------------------
@@ -581,4 +583,4 @@ passed_bdts <- cmips %>%
 print(passed_bdts)
 
 # Save the data
-write_csv(passed_bdts, "data/participants/passed_bdts/passed_bdts_03.04.24.csv")
+write_csv(passed_bdts, "data/participants/passed_bdts/passed_bdts_03.23.24.csv")
