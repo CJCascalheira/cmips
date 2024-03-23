@@ -5,6 +5,7 @@
 data/raw/**
 data/iphub_info/**
 data/participants/**
+data/util/**
 
 # -----------------------------------------------------
 # R files
