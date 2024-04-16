@@ -10,11 +10,25 @@ If you use the bot detection tactics (BDTs) in your work, please cite the corres
 
 ## Order of Script Exection
 
-**Clean and Preprocess**
+**Clean and Preprocess, Part I**
+0. src/recruitment_sources.R
 1. src/bdt_script.R
 2. src/clean/clean_qualtrics.R
 3. src/clean/clean_strain.R
 4. src/clean/combine_dichotomize.R
+5. src/extract/*
+6. src/clean/combine_social_media.R
 
-**Analyze**
-5. src/analyze/feasibility_consort.R
+**Analyze, Part I**
+7. src/analyze/describe_social_media.R
+
+**Clean and Preprocess, Part II**
+8. src/clean/combine_social_media.py
+9. src/clean/clean_social_media.R
+
+**Create Features / NLP-Generated Independent Variables**
+10. src/create_features/*
+
+**Analyze, Part II**
+11. src/analyze/describe_social_media.R
+12. src/analyze/describe_participants.R

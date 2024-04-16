@@ -6,4 +6,8 @@ data/
 ----/participants
 --------/passed_bdts
 --------/cleaned
+--------/for_analysis
+--------/util
+--------/features
 ----/util
+----/for_analysis

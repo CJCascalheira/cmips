@@ -102,7 +102,8 @@ cmips_qualtrics <- cmips_qualtrics %>%
                     "Androgynous,Female" = "Other", "Female,Femme" = "Cis Woman",
                     "Androgynous,Changes a lot" = "Other",
                     "Unsure" = "Other",
-                    "Male,Two-spirit" = "Other"),
+                    "Male,Two-spirit" = "Other",
+                    "Female" = "Cis Woman"),
     gender = if_else(str_detect(gender, regex("enby", ignore_case = TRUE)), 
                      "Nonbinary", gender),
     gender = if_else(str_detect(gender, regex("trans masculine|transgender man", ignore_case = TRUE)), 
@@ -129,7 +130,12 @@ table(cmips_qualtrics$race)
 table(cmips_qualtrics$gender)
 table(cmips_qualtrics$sex_or)
 
-# Remove the single heterosexual person due to minority stress measures
+# Identify heterosexual people who got through screening
+cmips_str8_folx <- cmips_qualtrics %>%
+  filter(sex_or == "Straight or heterosexual") %>%
+  select(ParticipantID, ResponseId)
+
+# Remove heterosexual people due to minority stress measures
 cmips_qualtrics <- cmips_qualtrics %>%
   filter(sex_or != "Straight or heterosexual")
 
@@ -720,3 +726,6 @@ cmips_qualtrics <- left_join(cmips_qualtrics, bsmas_total) %>%
 
 # Export the cleaned Qualtrics survey
 write_csv(cmips_qualtrics, "data/participants/cleaned/cmips_qualtrics.csv")
+
+# Export the heterosexual folx who we removed
+write_csv(cmips_str8_folx, "data/participants/util/cmips_str8_folx.csv")
