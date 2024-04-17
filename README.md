@@ -23,7 +23,7 @@ If you use the bot detection tactics (BDTs) in your work, please cite the corres
 7. src/analyze/describe_social_media.R
 
 **Clean and Preprocess, Part II**
-8. src/clean/combine_social_media.py
+8. src/clean/clean_social_media.py
 9. src/clean/clean_social_media.R
 
 **Create Features / NLP-Generated Independent Variables**

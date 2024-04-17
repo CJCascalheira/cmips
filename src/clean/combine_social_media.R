@@ -28,40 +28,41 @@ facebook_reactions2 <- read_csv("data/raw/social_media/facebook_likes_and_reacti
   select(-actor)
 
 facebook_posts1 <- read_csv("data/raw/social_media/facebook_posts_html_data.csv") %>%
-  mutate(timestamp = mdy_hms(timestamp))
+  mutate(timestamp = mdy_hms(timestamp)) %>%
+  # Put all text into one column
+  unite(col = "posts_comments", description:post, sep = " ") %>%
+  # Drop unnecessary columns
+  select(-title)
 
 facebook_posts2 <- read_csv("data/raw/social_media/facebook_posts_json_data.csv") %>%
-  mutate(timestamp = as_datetime(timestamp)) %>%
-  select(-creation_timestamp)
+  mutate(timestamp = as_datetime(timestamp)) %>% 
+  # Unite the media text with posts
+  unite(col = "posts_comments", media_description:post, sep = " ") %>%
+  # Drop unnecessary columns
+  select(participant_id, timestamp, posts_comments)
 
 facebook_comments1 <- read_csv("data/raw/social_media/facebook_comments_html_data.csv") %>%
   select(-timestamp, -comment_author) %>%
   rename(timestamp = comment_timestamp) %>%
   mutate(timestamp = mdy_hms(timestamp)) %>%
-  select(participant_id, timestamp, everything()) 
+  select(participant_id, timestamp, posts_comments = comment_content) 
 
 facebook_comments2 <- read_csv("data/raw/social_media/facebook_comments_json_data.csv") %>%
   select(-timestamp, -comment_author) %>%
   rename(timestamp = comment_timestamp) %>%
   mutate(timestamp = as_datetime(timestamp)) %>%
-  select(participant_id, timestamp, everything())
+  select(participant_id, timestamp, posts_comments = comment_content)
 
 # Initial combine
 facebook_reactions <- bind_rows(facebook_reactions1, facebook_reactions2) %>%
   mutate(platform = "facebook")
 facebook_posts <- bind_rows(facebook_posts1, facebook_posts2)
-facebook_comments <- bind_rows(facebook_comments1, facebook_comments2) %>%
-  rename(posts_comments = comment_content)
-
-# Merge columns
-facebook_posts <- facebook_posts %>%
-  unite(col = "posts_comments", description:post, sep = " ")
+facebook_comments <- bind_rows(facebook_comments1, facebook_comments2)
 
 # Combine posts and comments
 facebook_posts_comments <- bind_rows(facebook_comments, facebook_posts) %>%
   arrange(participant_id, timestamp) %>%
-  mutate(platform = "facebook") %>%
-  select(-title)
+  mutate(platform = "facebook")
 
 # Check timestamp work
 facebook_reactions1 %>%
@@ -87,6 +88,7 @@ participants_with_missing_data <- facebook_posts2 %>%
   filter(is.na(timestamp)) %>%
   distinct(participant_id) %>%
   pull(participant_id)
+participants_with_missing_data
 
 # Check if all data is missing for these 21 participants 
 facebook_posts2 %>%
@@ -97,7 +99,7 @@ facebook_posts2 %>%
   ) %>%
   count(participant_id, miss_time)
 
-# Analyze this missing data in the descriptive statistics of the social media data
+# No more missing data!
 
 # ...2) Twitter/X ---------------------------------------------------------
 

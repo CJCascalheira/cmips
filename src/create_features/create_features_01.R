@@ -19,7 +19,11 @@ library(hms)
 
 # Import data
 social_media_posts_comments <- read_csv("data/participants/cleaned/social_media_posts_full.csv")
+
 social_media_reactions <- read_csv("data/participants/cleaned/social_media_reactions.csv")
+
+social_media_with_urls <- read_csv("data/participants/combined_social_media/social_media_posts_demojized.csv") %>%
+  select(-...1)
 
 # BEHAVIORAL ENGAGEMENT ---------------------------------------------------
 
@@ -45,7 +49,7 @@ feat_be_avg_12_6 <- social_media_posts_comments %>%
 # ...2) The average number of URLs used -----------------------------------
 
 # Create the URL feature
-feat_be_avg_n_urls <- social_media_posts_comments %>%
+feat_be_avg_n_urls <- social_media_with_urls %>%
   mutate(n_urls = str_count(posts_comments, regex("(http|ftp|https):\\/\\/([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:\\/~+#-]*[\\w@?^=%&\\/~+#-])"))) %>%
   group_by(participant_id) %>%
   summarize(
