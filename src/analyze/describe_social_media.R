@@ -41,6 +41,10 @@ anti_join(participant_tracker_ids, extraction_posts_ids)
 anti_join(participant_tracker_ids, extraction_reactions_ids) %>% 
   pull(participant_id)
 
+# Manually checked social media of participants still missing data. Fixed a bug
+# in the extraction code. However, CMIPS_0312 and CMIPS_0374 are still missing
+# data. They simply did not submit the requested data, so nothing we can do. 
+
 # ANALYZE RAW DATA ---------------------------------------------------------
 
 # Count data shared from each social media platform

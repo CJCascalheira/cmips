@@ -111,8 +111,18 @@ for folder_name in os.listdir(root_folder_path):
                 data_to_append_df = extract_like_data(like_js_file_path, str(profile_id))
                  # Append data_to_append to json_data
                 like_data = like_data.append(data_to_append_df, ignore_index=True)  
-        else:
-            continue  # Go to the next item in the outer loop
+                
+        # Check for 'tweets.js' file outside 'data' subfolder
+        tweet_js_path_outside = os.path.join(folder_path, 'tweets.js')
+        if os.path.exists(tweet_js_path_outside):
+            print("Found 'tweets.js' outside of 'data' folder in:", folder_path)
+            tweet_data = tweet_data.append(extract_tweet_data(tweet_js_path_outside, str(profile_id)))
+
+        # Check for 'like.js' file outside 'data' subfolder
+        like_js_path_outside = os.path.join(folder_path, 'like.js')
+        if os.path.exists(like_js_path_outside):
+            print("Found 'like.js' outside of 'data' folder in:", folder_path)
+            like_data = like_data.append(extract_like_data(like_js_path_outside, str(profile_id)))
 
 # Print profile IDs
 print("Profile IDs:", profile_ids)
