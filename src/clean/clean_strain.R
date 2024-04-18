@@ -50,6 +50,9 @@ severity_vars <- strain_labels_key %>%
   filter(severity == 1) %>%
   pull(strain_variables)
 
+# Add the total stressor count variable
+severity_vars <- c(severity_vars, "StressCT")
+
 # Retain only severity variables
 cmips_strain_severity <- cmips_strain_full %>%
   select(email, date, duration, severity_vars)
