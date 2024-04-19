@@ -15,7 +15,9 @@ library(janitor)
 
 # Import data
 social_media_posts <- read_csv("data/participants/combined_social_media/social_media_posts_full.csv")
+
 social_media_reactions <- read_csv("data/participants/combined_social_media/social_media_reactions.csv")
+
 participant_tracker <- read_excel("data/participants/Participant_Tracking.xlsx",
                                   sheet = 1) %>%
   # Keep only usable rows
@@ -36,7 +38,8 @@ extraction_reactions_ids <- social_media_reactions %>%
   distinct(participant_id)
 
 # Find non matches
-anti_join(participant_tracker_ids, extraction_posts_ids)
+shared_wrong_data <- anti_join(participant_tracker_ids, extraction_posts_ids)
+shared_wrong_data
 
 anti_join(participant_tracker_ids, extraction_reactions_ids) %>% 
   pull(participant_id)
@@ -44,6 +47,11 @@ anti_join(participant_tracker_ids, extraction_reactions_ids) %>%
 # Manually checked social media of participants still missing data. Fixed a bug
 # in the extraction code. However, CMIPS_0312 and CMIPS_0374 are still missing
 # data. They simply did not submit the requested data, so nothing we can do. 
+
+# Import cleaned data
+social_media_posts_cleaned <- read_csv("data/participants/cleaned/social_media_posts_cleaned.csv")
+
+social_media_reactions_cleaned <- read_csv("data/participants/cleaned/social_media_reactions.csv")
 
 # ANALYZE RAW DATA ---------------------------------------------------------
 
@@ -116,3 +124,6 @@ nrow(social_media_posts) - nrow(sm_posts)
 # Save file to make covariates
 write_csv(participants_shared_both_fbtw, "data/participants/util/participants_shared_both_fbtw.csv")
 write_csv(participants_shared_more_one_year, "data/participants/util/participants_shared_more_one_year.csv")
+
+# Save file of participants who shared the wrong social media data
+write_csv(shared_wrong_data, "data/participants/util/shared_wrong_data.csv")

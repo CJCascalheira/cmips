@@ -22,7 +22,7 @@ participant_tracker <- read_excel("data/participants/Participant_Tracking.xlsx",
   # Keep only usable rows
   filter(!is.na(ResponseId))
 
-cimps_surveys <- read_csv("data/participants/for_analysis/cmips_surveys.csv")
+cimps_surveys <- read_csv("data/participants/for_analysis/cmips_surveys_full.csv")
 
 cmips_raw <- read_csv("data/raw/cmips_qualtrics.csv") %>%
   select(ResponseId, email) %>%
@@ -32,10 +32,22 @@ cmips_str8_folx <- read_csv("data/participants/util/cmips_str8_folx.csv")
 
 cmips_strain <- read_csv("data/participants/cleaned/cmips_strain_full.csv")
 
+shared_wrong_data <- read_csv("data/participants/util/shared_wrong_data.csv")
+
+social_media_posts_cleaned <- read_csv("data/participants/cleaned/social_media_posts_cleaned.csv") %>%
+  distinct(participant_id)
+
 # Remove the test trials from the raw qualtrics survey
 cmips_raw <- cmips_raw[-c(1:6),]
 
 # TRACK ENROLLMENT / COMPLETION -------------------------------------------
+
+# Quick look at tracker
+table(participant_tracker$Dropout)
+
+# Check IDs
+participant_tracker %>%
+  distinct(ParticipantID)
 
 # Count number of participants retained + missing social media data
 participant_tracker %>%
@@ -48,12 +60,22 @@ participants_smsent <- participant_tracker %>%
   filter(Keep == "YES") %>%
   pull(ResponseId)
 
+# Check shared social media data with participant tracker
+participant_tracker %>%
+  filter(Keep == "YES") %>%
+  filter(!(ParticipantID %in% social_media_posts_cleaned$participant_id))
+
 # For demographic analysis
 demographics <- cimps_surveys %>%
   filter(ResponseId %in% participants_smsent) %>%
-  filter(ResponseId != cmips_str8_folx$ResponseId)
+  filter(ResponseId != cmips_str8_folx$ResponseId) %>%
+  filter(!(ParticipantID %in% shared_wrong_data$participant_id))
 
 # CONSORT DIAGRAM ---------------------------------------------------------
+
+# People who failed the bot check
+cmips_raw %>%
+  filter(!(ResponseId %in% participant_tracker_consort$ResponseId))
 
 # Filter the participant tracking spreadsheet
 participant_tracker_consort <- participant_tracker %>%
@@ -62,14 +84,22 @@ participant_tracker_consort <- participant_tracker %>%
 # Get participants who dropped out at ID verification
 dropout_smlink <- participant_tracker_consort %>%
   filter(Dropout == "VerifySM_Link")
+nrow(dropout_smlink)
 
 # Get participants who failed Zoom/phone screen
 dropout_idverify <- participant_tracker_consort %>%
   filter(Dropout == "ID_verify")
+nrow(dropout_idverify)
+
+# Get participants who sent insufficient data
+dropout_smdownload <- participant_tracker_consort %>%
+  filter(Dropout == "VerifySM_Download")
+nrow(dropout_smdownload)
 
 # Get participants who never sent social media data
 dropout_smsent <- participant_tracker_consort %>%
   filter(Keep == "SM_MISS")
+nrow(dropout_smsent)
 
 # Initialize the disposition dataframe 
 consort_df <- cmips_raw %>%
@@ -103,10 +133,6 @@ cmips_consort <- consort_plot(data = consort_df,
                     cex = 0.9)
 
 plot(cmips_consort)
-
-# TYPE OF SOCIAL MEDIA DATA -----------------------------------------------
-
-# Finish this with Santosh CSVs
 
 # PARTICIPANT DEMOGRAPHICS ------------------------------------------------
 
