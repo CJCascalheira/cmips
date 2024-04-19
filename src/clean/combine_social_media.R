@@ -53,11 +53,33 @@ facebook_comments2 <- read_csv("data/raw/social_media/facebook_comments_json_dat
   mutate(timestamp = as_datetime(timestamp)) %>%
   select(participant_id, timestamp, posts_comments = comment_content)
 
+# Import data for participant CMIPS_0376
+facebook_comments_0376 <- read_csv("data/raw/social_media/facebook_comments_json_data_0376.csv") %>%
+  mutate(timestamp = as_datetime(timestamp)) %>%
+  select(participant_id, timestamp, posts_comments = comment_content)
+
+facebook_reactions_0376 <- read_csv("data/raw/social_media/facebook_likes_and_reactions_json_data_0376.csv") %>%
+  mutate(timestamp = as_datetime(timestamp)) %>%
+  mutate(reaction = tolower(reaction)) %>%
+  select(-actor)
+
+facebook_posts_0376 <- read_csv("data/raw/social_media/facebook_posts_json_data_0376.csv") %>%
+  mutate(timestamp = as_datetime(timestamp)) %>% 
+  # Unite the media text with posts
+  unite(col = "posts_comments", media_description:post, sep = " ") %>%
+  # Drop unnecessary columns
+  select(participant_id, timestamp, posts_comments)
+
 # Initial combine
 facebook_reactions <- bind_rows(facebook_reactions1, facebook_reactions2) %>%
+  bind_rows(facebook_reactions_0376) %>%
   mutate(platform = "facebook")
-facebook_posts <- bind_rows(facebook_posts1, facebook_posts2)
-facebook_comments <- bind_rows(facebook_comments1, facebook_comments2)
+
+facebook_posts <- bind_rows(facebook_posts1, facebook_posts2) %>%
+  bind_rows(facebook_posts_0376)
+
+facebook_comments <- bind_rows(facebook_comments1, facebook_comments2) %>%
+  bind_rows(facebook_comments_0376)
 
 # Combine posts and comments
 facebook_posts_comments <- bind_rows(facebook_comments, facebook_posts) %>%

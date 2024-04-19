@@ -252,21 +252,7 @@ def parse_likes_and_reactions_html(html_file_path, profile_id):
     return pd.DataFrame(comments_data)
 
 
-# Define the root folder path
-root_folder_path = r'C:\Users\Ankit Chapagain\OneDrive - USU\CMIPS\Social Media Data\UNZIP'
 
-# Initialize an empty list to store profile IDs
-profile_ids = []
-
-# Initialize an empty DataFrame to store the html content and related information
-post_data_json = pd.DataFrame(columns=['participant_id', 'timestamp',  'media_creation_timestamp', 'media_title', 'media_description', 'update_timestamp' 'post', 'title'])
-comment_data_json = pd.DataFrame(columns=['participant_id', 'timestamp', 'title', 'comment_timestamp', 'comment_content', 'comment_author'])
-reaction_data_json = pd.DataFrame(columns=['participant_id', 'timestamp', 'title', 'reaction','actor']) #####
-
-
-post_data_html = pd.DataFrame(columns=['participant_id', 'timestamp', 'title', 'description', 'post'])
-comment_data_html = pd.DataFrame(columns=['participant_id', 'timestamp', 'title', 'comment_timestamp', 'comment_content', 'comment_author'])
-reaction_data_html = pd.DataFrame(columns=['participant_id', 'timestamp', 'title', 'reaction','actor']) 
 
 # Define a function to extract profile ID from folder name
 def extract_profile_id(folder_name):
@@ -276,137 +262,157 @@ def extract_profile_id(folder_name):
     else:
         return None
 
-# Loop through folders
-for folder_name in os.listdir(root_folder_path):
-    folder_path = os.path.join(root_folder_path, folder_name)
-    if os.path.isdir(folder_path) and any(folder_name.endswith(suffix) for suffix in ['Facebook', 'Facebook1', 'Facebook2','Facebook3','Facebook-1','Facebook-2']):
-        # Extract and store the profile ID
-        profile_id = extract_profile_id(folder_name)
-        if profile_id:
-            profile_ids.append(profile_id)
-        
-        # Look for specific subfolders
-        subfolders = ['comments_and_reactions', 'posts', 'your_activity_across_facebook']
-        for subfolder in subfolders:
-            subfolder_path = os.path.join(folder_path, subfolder)
-            #print(subfolder_path)
+def main():
+
+    # Define the root folder path
+    root_folder_path = r'C:\Users\Ankit Chapagain\OneDrive - USU\CMIPS\Social Media Data\UNZIP'
+
+    # Initialize an empty list to store profile IDs
+    profile_ids = []
+
+    # Initialize an empty DataFrame to store the html content and related information
+    post_data_json = pd.DataFrame(columns=['participant_id', 'timestamp',  'media_creation_timestamp', 'media_title', 'media_description', 'update_timestamp' 'post', 'title'])
+    comment_data_json = pd.DataFrame(columns=['participant_id', 'timestamp', 'title', 'comment_timestamp', 'comment_content', 'comment_author'])
+    reaction_data_json = pd.DataFrame(columns=['participant_id', 'timestamp', 'title', 'reaction','actor']) #####
+
+
+    post_data_html = pd.DataFrame(columns=['participant_id', 'timestamp', 'title', 'description', 'post'])
+    comment_data_html = pd.DataFrame(columns=['participant_id', 'timestamp', 'title', 'comment_timestamp', 'comment_content', 'comment_author'])
+    reaction_data_html = pd.DataFrame(columns=['participant_id', 'timestamp', 'title', 'reaction','actor']) 
+
+    # Loop through folders
+    for folder_name in os.listdir(root_folder_path):
+        folder_path = os.path.join(root_folder_path, folder_name)
+        if os.path.isdir(folder_path) and any(folder_name.endswith(suffix) for suffix in ['Facebook', 'Facebook1', 'Facebook2','Facebook3','Facebook-1','Facebook-2']):
+            # Extract and store the profile ID
+            profile_id = extract_profile_id(folder_name)
+            if profile_id:
+                profile_ids.append(profile_id)
             
-            if subfolder == 'posts' and os.path.exists(os.path.join(subfolder_path, 'your_posts_1.json')):
-                print("Found 'your_posts_1.json' in:", subfolder_path)
-                ###PARSE your_posts_1.json
-                json_file_path = os.path.join(subfolder_path, 'your_posts_1.json')
-                data_to_append_df = parse_your_posts_1_to_dataframe(json_file_path, str(profile_id))
-                 # Append data_to_append to json_data
-                post_data_json = post_data_json.append(data_to_append_df, ignore_index=True)
+            # Look for specific subfolders
+            subfolders = ['comments_and_reactions', 'posts', 'your_activity_across_facebook']
+            for subfolder in subfolders:
+                subfolder_path = os.path.join(folder_path, subfolder)
+                #print(subfolder_path)
                 
-            if subfolder == 'posts' and os.path.exists(os.path.join(subfolder_path, 'your_posts_1.html')):
-                print("Found 'your_posts_1.html' in:", subfolder_path)
-                your_posts_html_file_path = os.path.join(subfolder_path, 'your_posts_1.html')
-                data_to_append_df = parse_your_posts_html(your_posts_html_file_path, str(profile_id))
-                post_data_html = post_data_html.append(data_to_append_df, ignore_index=True)
-            
-            if subfolder == 'comments_and_reactions' and os.path.exists(subfolder_path):
-                if os.path.exists(os.path.join(subfolder_path, 'comments.html')):
-                    print("Found 'comments.html' in:", subfolder_path)
-                    comments_hmtl_file_path = os.path.join(subfolder_path, 'comments.html')
-                    data_to_append_df = parse_comments_html(comments_hmtl_file_path, str(profile_id))
-                    # Append data_to_append to json_data
-                    comment_data_html = comment_data_html.append(data_to_append_df, ignore_index=True)
+                if subfolder == 'posts' and os.path.exists(os.path.join(subfolder_path, 'your_posts_1.json')):
+                    print("Found 'your_posts_1.json' in:", subfolder_path)
+                    ###PARSE your_posts_1.json
+                    json_file_path = os.path.join(subfolder_path, 'your_posts_1.json')
+                    data_to_append_df = parse_your_posts_1_to_dataframe(json_file_path, str(profile_id))
+                     # Append data_to_append to json_data
+                    post_data_json = post_data_json.append(data_to_append_df, ignore_index=True)
                     
-                if os.path.exists(os.path.join(subfolder_path, 'comments.json')):
-                    print("Found 'comments.json' in:", subfolder_path)
-                    comments_json_file_path = os.path.join(subfolder_path, 'comments.json')
-                    data_to_append_df = parse_comments_json(comments_json_file_path, str(profile_id))
-                    # Append data_to_append to json_data
-                    comment_data_json = comment_data_json.append(data_to_append_df, ignore_index=True)
-                    
-                for filename in os.listdir(subfolder_path):
-                    #print(filename)
-                    if filename.endswith('.json'):
-                        #anyfile name other than comments.json is likes and reaction
-                        if os.path.exists(os.path.join(subfolder_path, filename)) and filename != 'comments.json':
-                            print(filename, "found in",subfolder_path )
-                            reaction_json_file_path = os.path.join(subfolder_path, filename)
-                            data_to_append_df = parse_likes_and_reactions_json(reaction_json_file_path, str(profile_id))
-                            # Append data_to_append to json_data
-                            reaction_data_json = reaction_data_json.append(data_to_append_df, ignore_index=True)
-    
-                    if filename.endswith('.html'):
-                        #anyfile name other than comments.html is likes and reaction
-                        if os.path.exists(os.path.join(subfolder_path, filename)) and filename != 'comments.html':
-                            print(filename, "found in",subfolder_path )
-                            reaction_html_file_path = os.path.join(subfolder_path, filename)
-                            data_to_append_df = parse_likes_and_reactions_html(reaction_html_file_path, str(profile_id))
-                            # Append data_to_append to json_data
-                            reaction_data_html = reaction_data_html.append(data_to_append_df, ignore_index=True)
-                            
-            #there are some files inside this folder                
-            if subfolder == 'your_activity_across_facebook' and os.path.exists(subfolder_path):
-                subsubfolders = ['comments_and_reactions', 'posts']
-                folder_path = os.path.join(folder_path, subfolder)
-                for subsubfolder in subsubfolders:   
-                    subsubfolder_path = os.path.join(folder_path, subsubfolder)
-                    if subsubfolder == 'posts' and os.path.exists(os.path.join(subsubfolder_path, 'your_posts_1.json')):
-                        print("Found 'your_posts_1.json' in:", subsubfolder_path)
-                        json_file_path = os.path.join(subsubfolder_path, 'your_posts_1.json')
-                        data_to_append_df = parse_your_posts_1_to_dataframe(json_file_path, str(profile_id))
-                        post_data_json = post_data_json.append(data_to_append_df, ignore_index=True)
+                if subfolder == 'posts' and os.path.exists(os.path.join(subfolder_path, 'your_posts_1.html')):
+                    print("Found 'your_posts_1.html' in:", subfolder_path)
+                    your_posts_html_file_path = os.path.join(subfolder_path, 'your_posts_1.html')
+                    data_to_append_df = parse_your_posts_html(your_posts_html_file_path, str(profile_id))
+                    post_data_html = post_data_html.append(data_to_append_df, ignore_index=True)
+                
+                if subfolder == 'comments_and_reactions' and os.path.exists(subfolder_path):
+                    if os.path.exists(os.path.join(subfolder_path, 'comments.html')):
+                        print("Found 'comments.html' in:", subfolder_path)
+                        comments_hmtl_file_path = os.path.join(subfolder_path, 'comments.html')
+                        data_to_append_df = parse_comments_html(comments_hmtl_file_path, str(profile_id))
+                        # Append data_to_append to json_data
+                        comment_data_html = comment_data_html.append(data_to_append_df, ignore_index=True)
                         
+                    if os.path.exists(os.path.join(subfolder_path, 'comments.json')):
+                        print("Found 'comments.json' in:", subfolder_path)
+                        comments_json_file_path = os.path.join(subfolder_path, 'comments.json')
+                        data_to_append_df = parse_comments_json(comments_json_file_path, str(profile_id))
+                        # Append data_to_append to json_data
+                        comment_data_json = comment_data_json.append(data_to_append_df, ignore_index=True)
                         
-                    if subfolder == 'posts' and os.path.exists(os.path.join(subsubfolder_path, 'your_posts_1.html')):
-                        print("Found 'your_posts_1.html' in:", subsubfolder_path)
-                        your_posts_html_file_path = os.path.join(subsubfolder_path, 'your_posts_1.html')
-                        data_to_append_df = parse_your_posts_html(your_posts_html_file_path, str(profile_id))
-                        post_data_html = post_data_html.append(data_to_append_df, ignore_index=True)
-
-                    if subsubfolder == 'comments_and_reactions' and os.path.exists(subsubfolder_path):
-                        if os.path.exists(os.path.join(subsubfolder_path, 'comments.json')):
-                            print("Found 'comments.json' in:", subsubfolder_path)
-                            comments_json_file_path = os.path.join(subsubfolder_path, 'comments.json')
-                            data_to_append_df = parse_comments_json(comments_json_file_path, str(profile_id))
-                            # Append data_to_append to json_data
-                            comment_data_json = comment_data_json.append(data_to_append_df, ignore_index=True) 
+                    for filename in os.listdir(subfolder_path):
+                        #print(filename)
+                        if filename.endswith('.json'):
+                            #anyfile name other than comments.json is likes and reaction
+                            if os.path.exists(os.path.join(subfolder_path, filename)) and filename != 'comments.json':
+                                print(filename, "found in",subfolder_path )
+                                reaction_json_file_path = os.path.join(subfolder_path, filename)
+                                data_to_append_df = parse_likes_and_reactions_json(reaction_json_file_path, str(profile_id))
+                                # Append data_to_append to json_data
+                                reaction_data_json = reaction_data_json.append(data_to_append_df, ignore_index=True)
+        
+                        if filename.endswith('.html'):
+                            #anyfile name other than comments.html is likes and reaction
+                            if os.path.exists(os.path.join(subfolder_path, filename)) and filename != 'comments.html':
+                                print(filename, "found in",subfolder_path )
+                                reaction_html_file_path = os.path.join(subfolder_path, filename)
+                                data_to_append_df = parse_likes_and_reactions_html(reaction_html_file_path, str(profile_id))
+                                # Append data_to_append to json_data
+                                reaction_data_html = reaction_data_html.append(data_to_append_df, ignore_index=True)
+                                
+                #there are some files inside this folder                
+                if subfolder == 'your_activity_across_facebook' and os.path.exists(subfolder_path):
+                    subsubfolders = ['comments_and_reactions', 'posts']
+                    folder_path = os.path.join(folder_path, subfolder)
+                    for subsubfolder in subsubfolders:   
+                        subsubfolder_path = os.path.join(folder_path, subsubfolder)
+                        if subsubfolder == 'posts' and os.path.exists(os.path.join(subsubfolder_path, 'your_posts_1.json')):
+                            print("Found 'your_posts_1.json' in:", subsubfolder_path)
+                            json_file_path = os.path.join(subsubfolder_path, 'your_posts_1.json')
+                            data_to_append_df = parse_your_posts_1_to_dataframe(json_file_path, str(profile_id))
+                            post_data_json = post_data_json.append(data_to_append_df, ignore_index=True)
                             
-                        if os.path.exists(os.path.join(subsubfolder_path, 'comments.html')):
-                            print("Found 'comments.html' in:", subsubfolder_path)
-                            comments_hmtl_file_path = os.path.join(subsubfolder_path, 'comments.html')
-                            data_to_append_df = parse_comments_html(comments_hmtl_file_path, str(profile_id))
-                            # Append data_to_append to json_data
-                            comment_data_html = comment_data_html.append(data_to_append_df, ignore_index=True)
                             
-                        for filename in os.listdir(subsubfolder_path):
-                            #print(filename)
-                            if filename.endswith('.json'):
-                                #anyfile name other than comments.json is likes and reaction
-                                if os.path.exists(os.path.join(subsubfolder_path, filename)) and filename != 'comments.json':
-                                    print(filename, "found in",subsubfolder_path )
-                                    reaction_json_file_path = os.path.join(subsubfolder_path, filename)
-                                    data_to_append_df = parse_likes_and_reactions_json(reaction_json_file_path, str(profile_id))
-                                    # Append data_to_append to json_data
-                                    reaction_data_json = reaction_data_json.append(data_to_append_df, ignore_index=True)       
-                            if filename.endswith('.html'):
-                                #anyfile name other than comments.html is likes and reaction
-                                if os.path.exists(os.path.join(subsubfolder_path, filename)) and filename != 'comments.html':
-                                    print(filename, "found in",subsubfolder_path )
-                                    reaction_html_file_path = os.path.join(subsubfolder_path, filename)
-                                    data_to_append_df = parse_likes_and_reactions_html(reaction_html_file_path, str(profile_id))
-                                    # Append data_to_append to json_data
-                                    reaction_data_html = reaction_data_html.append(data_to_append_df, ignore_index=True)
+                        if subfolder == 'posts' and os.path.exists(os.path.join(subsubfolder_path, 'your_posts_1.html')):
+                            print("Found 'your_posts_1.html' in:", subsubfolder_path)
+                            your_posts_html_file_path = os.path.join(subsubfolder_path, 'your_posts_1.html')
+                            data_to_append_df = parse_your_posts_html(your_posts_html_file_path, str(profile_id))
+                            post_data_html = post_data_html.append(data_to_append_df, ignore_index=True)
 
-        else:
-            continue  # Go to the next item in the outer loop
+                        if subsubfolder == 'comments_and_reactions' and os.path.exists(subsubfolder_path):
+                            if os.path.exists(os.path.join(subsubfolder_path, 'comments.json')):
+                                print("Found 'comments.json' in:", subsubfolder_path)
+                                comments_json_file_path = os.path.join(subsubfolder_path, 'comments.json')
+                                data_to_append_df = parse_comments_json(comments_json_file_path, str(profile_id))
+                                # Append data_to_append to json_data
+                                comment_data_json = comment_data_json.append(data_to_append_df, ignore_index=True) 
+                                
+                            if os.path.exists(os.path.join(subsubfolder_path, 'comments.html')):
+                                print("Found 'comments.html' in:", subsubfolder_path)
+                                comments_hmtl_file_path = os.path.join(subsubfolder_path, 'comments.html')
+                                data_to_append_df = parse_comments_html(comments_hmtl_file_path, str(profile_id))
+                                # Append data_to_append to json_data
+                                comment_data_html = comment_data_html.append(data_to_append_df, ignore_index=True)
+                                
+                            for filename in os.listdir(subsubfolder_path):
+                                #print(filename)
+                                if filename.endswith('.json'):
+                                    #anyfile name other than comments.json is likes and reaction
+                                    if os.path.exists(os.path.join(subsubfolder_path, filename)) and filename != 'comments.json':
+                                        print(filename, "found in",subsubfolder_path )
+                                        reaction_json_file_path = os.path.join(subsubfolder_path, filename)
+                                        data_to_append_df = parse_likes_and_reactions_json(reaction_json_file_path, str(profile_id))
+                                        # Append data_to_append to json_data
+                                        reaction_data_json = reaction_data_json.append(data_to_append_df, ignore_index=True)       
+                                if filename.endswith('.html'):
+                                    #anyfile name other than comments.html is likes and reaction
+                                    if os.path.exists(os.path.join(subsubfolder_path, filename)) and filename != 'comments.html':
+                                        print(filename, "found in",subsubfolder_path )
+                                        reaction_html_file_path = os.path.join(subsubfolder_path, filename)
+                                        data_to_append_df = parse_likes_and_reactions_html(reaction_html_file_path, str(profile_id))
+                                        # Append data_to_append to json_data
+                                        reaction_data_html = reaction_data_html.append(data_to_append_df, ignore_index=True)
+
+            else:
+                continue  # Go to the next item in the outer loop
 
 
-print("Profile IDs:", profile_ids)
+    print("Profile IDs:", profile_ids)
 
-post_data_json.to_csv('facebook_posts_json_data.csv',index=False)
-comment_data_json.to_csv('facebook_comments_json_data.csv',index=False)
-reaction_data_json.to_csv('facebook_likes_and_reactions_json_data.csv',index=False)
+    post_data_json.to_csv('facebook_posts_json_data.csv',index=False)
+    comment_data_json.to_csv('facebook_comments_json_data.csv',index=False)
+    reaction_data_json.to_csv('facebook_likes_and_reactions_json_data.csv',index=False)
 
 
-post_data_html.to_csv('facebook_posts_html_data.csv',index=False)
-comment_data_html.to_csv('facebook_comments_html_data.csv',index=False) 
-reaction_data_html.to_csv('facebook_likes_and_reactions_html_data.csv',index=False) 
+    post_data_html.to_csv('facebook_posts_html_data.csv',index=False)
+    comment_data_html.to_csv('facebook_comments_html_data.csv',index=False) 
+    reaction_data_html.to_csv('facebook_likes_and_reactions_html_data.csv',index=False) 
 
+if __name__ == "__main__":
+    main()
 
 
