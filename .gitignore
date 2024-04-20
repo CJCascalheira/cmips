@@ -7,6 +7,7 @@ data/iphub_info/**
 data/participants/**
 data/util/**
 results/plots/**
+gsdmm/*
 
 # -----------------------------------------------------
 # R files
