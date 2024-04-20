@@ -207,3 +207,31 @@ demographics %>%
 # Total completed Qualtrics and Adult STRAIN
 nrow(cmips_surveys)
 nrow(cmips_strain)
+
+# MODEL NON-RESPONSE BIAS -------------------------------------------------
+
+# Prepare the main survey
+cmips_dropout <- cimps_surveys %>%
+  select(ParticipantID, age, starts_with("is"))
+
+# Start with the participant tracker
+cmips_dropout_df <- participant_tracker %>%
+  filter(Keep %in% c("YES", "SM_MISS")) %>%
+  # Recode the keep column based on social media extraction analysis
+  mutate(Keep = if_else(ParticipantID %in% shared_wrong_data$participant_id, 
+                        "SM_MISS", Keep)) %>%
+  select(ParticipantID, Keep) %>%
+  mutate(dropout = if_else(Keep == "SM_MISS", 1, 0)) %>%
+  left_join(cmips_dropout)
+
+# Logistic regression - age
+cmips_dropout_df
+
+# Logistic regression - sexual orientation
+cmips_dropout_df
+
+# Logistic regression - gender
+cmips_dropout_df
+
+# Logistic regression - race
+cmips_dropout_df

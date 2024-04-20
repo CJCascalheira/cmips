@@ -3,7 +3,8 @@
 # Author = Cory Cascalheira
 # Date = 03/23/2024
 
-# Combine the psychometric surveys. Create classification labels.
+# Combine the psychometric surveys. Create classification labels. Create 
+# demographic covariates for non-response bias modeling.
 
 # DEPENDENCIES AND IMPORT -------------------------------------------------
 
@@ -111,6 +112,24 @@ cmips_stress_labels <- cmips_stress_outcomes %>%
 cmips_surveys_full <- left_join(cmips_surveys_full, cmips_stress_labels)
 
 cmips_surveys_anonymous_dissertation <- left_join(cmips_surveys_anonymous_dissertation, cmips_stress_labels)
+
+# ...4) Create Demographic Covariates -------------------------------------
+
+# Create covariates - full data
+cmips_surveys_full <- cmips_surveys_full %>% 
+  mutate(
+    is_queer = if_else(sex_or == "Queer", 1, 0),
+    is_trans = if_else(str_detect(gender, regex("cisgender", ignore_case = TRUE)), 0, 1),
+    is_bipoc = if_else(race != "White", 1, 0)
+  )
+
+# Create covariates - anon data
+cmips_surveys_anonymous_dissertation <- cmips_surveys_anonymous_dissertation %>%
+  mutate(
+    is_queer = if_else(sex_or == "Queer", 1, 0),
+    is_trans = if_else(str_detect(gender, regex("cisgender", ignore_case = TRUE)), 0, 1),
+    is_bipoc = if_else(race != "White", 1, 0)
+  )
 
 # EXPORT ------------------------------------------------------------------
 
