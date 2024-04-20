@@ -18,8 +18,6 @@ library(lubridate)
 library(hms)
 
 # Import data
-social_media_posts_comments <- read_csv("data/participants/cleaned/social_media_posts_full.csv")
-
 social_media_reactions <- read_csv("data/participants/cleaned/social_media_reactions.csv")
 
 social_media_with_urls <- read_csv("data/participants/combined_social_media/social_media_posts_demojized.csv") %>%
@@ -34,7 +32,7 @@ start_time <- as_hms(ymd_hms("2022-01-11 00:00:00 UTC"))
 end_time <- as_hms(ymd_hms("2022-01-11 06:00:00 UTC"))
 
 # Calculate the feature
-feat_be_avg_12_6 <- social_media_posts_comments %>%
+feat_be_avg_12_6 <- social_media_with_urls %>%
   mutate(just_time = as_hms(timestamp)) %>%
   mutate(btwn_12_6 = if_else(between(just_time, start_time, end_time), 1, 0)) %>%
   group_by(participant_id) %>%
@@ -63,7 +61,7 @@ feat_be_avg_n_urls <- social_media_with_urls %>%
 # ...3) The average number of hashtags used -------------------------------
 
 # Create the hashtag feature
-feat_be_avg_hashtags <- social_media_posts_comments %>%
+feat_be_avg_hashtags <- social_media_with_urls %>%
   mutate(n_hashtag = str_count(posts_comments, regex("#[:alnum:]+"))) %>%
   group_by(participant_id) %>%
   summarize(
@@ -77,7 +75,7 @@ feat_be_avg_hashtags <- social_media_posts_comments %>%
 # ...4) The average number of posts/comments per day ----------------------
 
 # Calculate the feature
-feat_be_avg_daily_posts <- social_media_posts_comments %>%
+feat_be_avg_daily_posts <- social_media_with_urls %>%
   # Extract date, removing time
   mutate(timestamp = as_date(timestamp)) %>%
   # For each user, count posts per day
@@ -92,7 +90,7 @@ feat_be_avg_daily_posts <- social_media_posts_comments %>%
 # ...5) Total number of posts/comments  -----------------------------------
 
 # Create the feature
-feat_be_total_n_posts <- social_media_posts_comments %>%
+feat_be_total_n_posts <- social_media_with_urls %>%
   group_by(participant_id) %>%
   summarize(
     be_total_n_posts = n()
@@ -112,7 +110,7 @@ feat_be_total_n_reactions <- social_media_reactions %>%
 # ...7) Maximum number posts/comments -------------------------------------
 
 # Create feature
-feat_be_max_posts_day <- social_media_posts_comments %>%
+feat_be_max_posts_day <- social_media_with_urls %>%
   # Extract date, removing time
   mutate(timestamp = as_date(timestamp)) %>%
   # For each user, count posts per day
@@ -123,13 +121,15 @@ feat_be_max_posts_day <- social_media_posts_comments %>%
     be_max_posts_day = max(n_posts)
   )
 
-# COMBINE ALL FEATURES ----------------------------------------------------
+# COMBINE AND EXPORT ------------------------------------------------------
 
-feat_be_avg_12_6
-feat_be_avg_n_urls
-feat_be_avg_hashtags
-feat_be_avg_daily_posts
-feat_be_total_n_posts
-feat_be_total_n_reactions
-feat_be_max_posts_day
+# Combine
+cmips_feature_set_01 <- left_join(feat_be_avg_12_6, feat_be_avg_n_urls) %>%
+  left_join(feat_be_avg_hashtags) %>%
+  left_join(feat_be_avg_daily_posts) %>%
+  left_join(feat_be_total_n_posts) %>%
+  left_join(feat_be_total_n_reactions) %>%
+  left_join(feat_be_max_posts_day)
 
+# Export
+write_csv(cmips_feature_set_01, "data/participants/features/cmips_feature_set_01.csv")

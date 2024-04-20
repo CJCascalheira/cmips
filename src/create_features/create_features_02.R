@@ -313,7 +313,7 @@ minority_stress_1995_df <- data.frame(article = minority_stress_1995) %>%
   filter(!(word %in% stop_words$word)) %>%
   # Lemmatize the words
   mutate(word = lemmatize_words(word)) %>%
-  # Top words in the DSM-5
+  # Top words 
   count(word) %>%
   arrange(desc(n)) %>%
   # Filter out common words
@@ -346,7 +346,7 @@ minority_stress_2003_df <- data.frame(article = minority_stress_2003) %>%
   filter(!(word %in% stop_words$word)) %>%
   # Lemmatize the words
   mutate(word = lemmatize_words(word)) %>%
-  # Top words in the DSM-5
+  # Top words
   count(word) %>%
   arrange(desc(n)) %>%
   # Filter out common words
@@ -378,7 +378,7 @@ minority_stress_ethnicity_df <- data.frame(article = minority_stress_ethnicity) 
   filter(!(word %in% stop_words$word)) %>%
   # Lemmatize the words
   mutate(word = lemmatize_words(word)) %>%
-  # Top words in the DSM-5
+  # Top words 
   count(word) %>%
   arrange(desc(n)) %>%
   # Filter out common words
@@ -410,7 +410,7 @@ minority_stress_transgender_df <- data.frame(article = minority_stress_transgend
   filter(!(word %in% stop_words$word)) %>%
   # Lemmatize the words
   mutate(word = lemmatize_words(word)) %>%
-  # Top words in the DSM-5
+  # Top words 
   count(word) %>%
   arrange(desc(n)) %>%
   # Filter out common words

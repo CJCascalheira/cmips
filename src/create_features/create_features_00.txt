@@ -1,0 +1,6 @@
+CREATE FEATURES - BASELINE SET
+
+LIWC 2015 was used to create the first set of features. LIWC is proprietary
+software. For more details, see: 
+
+https://mcrc.journalism.wisc.edu/files/2018/04/Manual_LIWC.pdf

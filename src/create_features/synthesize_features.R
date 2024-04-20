@@ -9,6 +9,16 @@
 
 # LOAD DEPENDENCIES AND IMPORT --------------------------------------------
 
-# Import feature sets
-cmips_feature_set_02 <- read_csv("data/participants/features/cmips_feature_set_02.csv")
+# Load libraries
+library(tidyverse)
 
+# Import feature sets
+cmips_feature_set_00 <- read_csv("data/participants/features/cmips_feature_set_00.csv") %>%
+  rename(participant_id = A, timestamp = B, posts_comments = C)
+
+cmips_feature_set_01 <- read_csv("data/participants/features/cmips_feature_set_01.csv")
+
+cmips_feature_set_02 <- read_csv("data/participants/features/cmips_feature_set_02.csv") %>%
+  select(-text)
+
+cmips_feature_set_04 <- read_csv("data/participants/features/cmips_feature_set_04.csv") 
