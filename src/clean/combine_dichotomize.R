@@ -119,7 +119,7 @@ cmips_surveys_anonymous_dissertation <- left_join(cmips_surveys_anonymous_disser
 cmips_surveys_full <- cmips_surveys_full %>% 
   mutate(
     is_queer = if_else(sex_or == "Queer", 1, 0),
-    is_trans = if_else(str_detect(gender, regex("cisgender", ignore_case = TRUE)), 0, 1),
+    is_trans = if_else(str_detect(gender, regex("Cis", ignore_case = TRUE)), 0, 1),
     is_bipoc = if_else(race != "White", 1, 0)
   )
 

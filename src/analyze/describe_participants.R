@@ -210,6 +210,8 @@ nrow(cmips_strain)
 
 # MODEL NON-RESPONSE BIAS -------------------------------------------------
 
+# ...1) Demographic Predictors --------------------------------------------
+
 # Prepare the main survey
 cmips_dropout <- cimps_surveys %>%
   select(ParticipantID, age, starts_with("is"))
@@ -222,16 +224,66 @@ cmips_dropout_df <- participant_tracker %>%
                         "SM_MISS", Keep)) %>%
   select(ParticipantID, Keep) %>%
   mutate(dropout = if_else(Keep == "SM_MISS", 1, 0)) %>%
-  left_join(cmips_dropout)
+  left_join(cmips_dropout) %>%
+  filter(!is.na(is_queer))
 
 # Logistic regression - age
-cmips_dropout_df
+mylogit <- glm(dropout ~ age, data = cmips_dropout_df, family = "binomial")
+summary(mylogit)
 
 # Logistic regression - sexual orientation
-cmips_dropout_df
+mylogit <- glm(dropout ~ is_queer, data = cmips_dropout_df, family = "binomial")
+summary(mylogit)
 
 # Logistic regression - gender
-cmips_dropout_df
+mylogit <- glm(dropout ~ is_trans, data = cmips_dropout_df, family = "binomial")
+summary(mylogit)
 
 # Logistic regression - race
-cmips_dropout_df
+mylogit <- glm(dropout ~ is_bipoc, data = cmips_dropout_df, family = "binomial")
+summary(mylogit)
+
+# ...2) Stressor Predictors -----------------------------------------------
+
+# Prepare the main survey
+cmips_dropout <- cimps_surveys %>%
+  select(ParticipantID, ends_with("total"), ends_with("mean"), StressTH, 
+         StressCT) %>%
+  select(-CLCS_total, -AUDIT_total, -DUDIT_total, -PHQ9_total, -GAD7_total, 
+         -starts_with("label"), -BSMAS_total)
+
+# Start with the participant tracker
+cmips_dropout_df <- participant_tracker %>%
+  filter(Keep %in% c("YES", "SM_MISS")) %>%
+  # Recode the keep column based on social media extraction analysis
+  mutate(Keep = if_else(ParticipantID %in% shared_wrong_data$participant_id, 
+                        "SM_MISS", Keep)) %>%
+  select(ParticipantID, Keep) %>%
+  mutate(dropout = if_else(Keep == "SM_MISS", 1, 0)) %>%
+  left_join(cmips_dropout) %>%
+  filter(!is.na(PSS_total))
+
+# Check logistic regression
+mylogit <- glm(dropout ~ PSS_total, data = cmips_dropout_df, family = "binomial")
+summary(mylogit)
+
+mylogit <- glm(dropout ~ StressTH, data = cmips_dropout_df, family = "binomial")
+summary(mylogit)
+
+mylogit <- glm(dropout ~ StressCT, data = cmips_dropout_df, family = "binomial")
+summary(mylogit)
+
+mylogit <- glm(dropout ~ LEC_total, data = cmips_dropout_df, family = "binomial")
+summary(mylogit)
+
+mylogit <- glm(dropout ~ DHEQ_mean, data = cmips_dropout_df, family = "binomial")
+summary(mylogit)
+
+mylogit <- glm(dropout ~ SOER_total, data = cmips_dropout_df, family = "binomial")
+summary(mylogit)
+
+mylogit <- glm(dropout ~ IHS_mean, data = cmips_dropout_df, family = "binomial")
+summary(mylogit)
+
+mylogit <- glm(dropout ~ OI_mean, data = cmips_dropout_df, family = "binomial")
+summary(mylogit)
