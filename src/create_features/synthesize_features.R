@@ -6,7 +6,6 @@
 # The purpose of this script is to calculate the time-based summary variables for
 # all of the features. 
 
-
 # LOAD DEPENDENCIES AND IMPORT --------------------------------------------
 
 # Load libraries
@@ -22,3 +21,12 @@ cmips_feature_set_02 <- read_csv("data/participants/features/cmips_feature_set_0
   select(-text)
 
 cmips_feature_set_04 <- read_csv("data/participants/features/cmips_feature_set_04.csv") 
+
+cmips_feature_set_05_lda <- read_csv("data/participants/features/cmips_feature_set_05_lda.csv")
+
+cmips_feature_set_05_gsdmm <- read_csv("data/participants/features/cmips_feature_set_05_gsdmm.csv")
+
+# Import additional data
+lda_topic_name_df <- read_csv("data/participants/features/lda_topic_name_df.csv")
+
+# For LDA topics, need to pivot into wide format and rename topics

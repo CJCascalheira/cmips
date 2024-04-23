@@ -1,6 +1,6 @@
 """
 Author = Cory J. Cascalheira
-Date = 04/20/2024
+Date = 04/22/2024
 
 The purpose of this script is to create features for the CMIPS project using topic models.
 
@@ -16,12 +16,18 @@ The core code is heavily inspired by the following resources:
 
 # Core libraries
 import os
+import sys
 import pandas as pd
 import numpy as np
 import time
 
 # Import tool for regular expressions
 import re
+
+# Load plotting tools
+import pyLDAvis.gensim
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Load Gensim libraries
 import gensim
@@ -52,11 +58,8 @@ from gsdmm import MovieGroupProcess
 # Set file path
 my_path = os.getcwd()
 
-# Import data
+# Import preprocessed data
 cmips = pd.read_csv(my_path + '/data/participants/cleaned/social_media_posts_cleaned.csv')
-
-# DELETE LATER
-cmips = cmips.sample(n = 1000)
 
 #endregion
 
@@ -222,21 +225,7 @@ def top_words(cluster_word_distribution, top_cluster, values):
 #region PREPROCESS THE TEXT
 
 # Convert text to list
-cmips_text_original = cmips['posts_comments'].values.tolist()
-
-# Remove emails, new line characters, and single quotes
-cmips_text = [re.sub('\\S*@\\S*\\s?', '', sent) for sent in cmips_text_original]
-cmips_text = [re.sub('\\s+', ' ', sent) for sent in cmips_text]
-cmips_text = [re.sub("\'", "", sent) for sent in cmips_text]
-
-# Remove markdown links with multiple words
-cmips_text = [re.sub("\\[[\\S\\s]+\\]\\(https:\\/\\/[\\D]+\\)", "", sent) for sent in cmips_text]
-
-# Remove markdown links with single words
-cmips_text = [re.sub("\\[\\w+\\]\\(https:\\/\\/[\\D\\d]+\\)", "", sent) for sent in cmips_text]
-
-# Remove urls
-cmips_text = [re.sub("https:\\/\\/[\\w\\d\\.\\/\\-\\=]+", "", sent) for sent in cmips_text]
+cmips_text = cmips['posts_comments'].values.tolist()
 
 # Transform sentences into words, convert to list
 cmips_words = list(transform_to_words(cmips_text))
@@ -300,17 +289,15 @@ plt.plot(x, coherence_values)
 plt.xlabel("Number of Topics")
 plt.ylabel("UMass Coherence Score")
 plt.xticks(np.arange(min(x), max(x)+1, 2.0))
-plt.axvline(x=10, color='red')
-plt.savefig('plots/lda_coherence_plot.png')
-plt.show()
+plt.savefig('results/plots/lda_coherence_plot.png')
 
-# From the plot, the best LDA model is when num_topics == 10
-optimal_lda_model = model_list[4]
+# From the plot, the best LDA model is when num_topics == 22
+optimal_lda_model = model_list[10]
 
 # Visualize best LDA topic model
 # https://stackoverflow.com/questions/41936775/export-pyldavis-graphs-as-standalone-webpage
-vis = pyLDAvis.gensim_models.prepare(optimal_lda_model, corpus, id2word)
-pyLDAvis.save_html(vis, 'plots/lda.html')
+vis = pyLDAvis.gensim.prepare(optimal_lda_model, corpus, id2word)
+pyLDAvis.save_html(vis, 'results/plots/lda.html')
 
 # Get the Reddit post that best represents each topic
 # https://radimrehurek.com/gensim/models/ldamodel.html
@@ -320,74 +307,80 @@ lda_output = []
 topic_distributions = []
 
 # For each post, get the LDA estimation output
-for i in range(len(cmips_text_original)):
+for i in range(len(cmips_text)):
     lda_output.append(optimal_lda_model[corpus[i]])
 
 # For each output, select just the topic distribution
-for i in range(len(cmips_text_original)):
+for i in range(len(cmips_text)):
     topic_distributions.append(lda_output[i][0])
 
 # Initialize empty lists
-dominant_topics = []
-dominance_strength = []
+my_participant = []
+my_timestamp = []
+my_topic = []
+my_probability = []
 
-# For each post, extract the dominant topic from the topic distribution
-for i in range(len(cmips_text_original)):
+# For each participant
+for kth_participant in range(len(cmips['participant_id'])):
 
-    # Sort the tuple by the topic probability (2nd tuple item), largest to smallest
-    # https://www.geeksforgeeks.org/python-program-to-sort-a-list-of-tuples-by-second-item/
-    topic_distributions[i].sort(key = lambda x: x[1], reverse=True)
+    # Get each topic generated in the participant's post
+    for ith_topic in range(len(topic_distributions[kth_participant])):
+        # Save the participant ID and timestamp
+        my_participant.append(cmips['participant_id'].iloc[kth_participant])
+        my_timestamp.append(cmips['timestamp'].iloc[kth_participant])
 
-    # Extract the dominant topic
-    dominant_topic = topic_distributions[i][0][0]
-    dominant_topics.append(dominant_topic)
+        # Get the topic number
+        my_topic.append(topic_distributions[kth_participant][ith_topic][0])
 
-    # Extract the probability of the dominant topic
-    how_dominant = topic_distributions[i][0][1]
-    dominance_strength.append(how_dominant)
+        # Get the topic probability
+        my_probability.append(topic_distributions[kth_participant][ith_topic][1])
 
-# Prepare to merge with original dataframe
-new_cmips_df = cmips.loc[:, ['author', 'body', 'permalink']]
+# Create a dictionary
+topic_dict = {
+    "participant_id": my_participant,
+    "timestamp": my_timestamp,
+    "topic_number": my_topic,
+    "topic_probability": my_probability
+}
 
-# Add the dominant topics and strengths
-new_cmips_df['dominant_topic'] = dominant_topics
-new_cmips_df['topic_probability'] = dominance_strength
+# Create dataframe
+cmips_lda_df = pd.DataFrame(topic_dict)
 
-# Sort the data frame
-new_cmips_df = new_cmips_df.sort_values(by=['dominant_topic', 'topic_probability'], ascending=[True, False])
+# Extract top words
+# https://stackoverflow.com/questions/46536132/how-to-access-topic-words-only-in-gensim
+lda_top_words = optimal_lda_model.show_topics(num_topics=22, num_words=3)
+lda_tup_words = [lda_tup_words[1] for lda_tup_words in lda_top_words]
 
-# Percent of posts for each topic
-posts_per_topic = new_cmips_df.groupby(['dominant_topic'])['dominant_topic'].count()
-posts_per_topic = pd.DataFrame(posts_per_topic)
-posts_per_topic['percent_posts'] = posts_per_topic['dominant_topic'] / len(new_cmips_df.index)
-print(posts_per_topic)
+# Initialize empty list
+lad_topic_names = []
 
-# Select the 10 most illustrative posts per topic
-topics_to_quote = new_cmips_df.groupby(['dominant_topic']).head(10)
+# For each topic
+for topic in range(len(lda_tup_words)):
 
-# Save the data frame for easy reading
-topics_to_quote.to_csv("data/results/lda_topics_to_quote.csv")
+    # Extract the top 3 words
+    my_words = re.findall("\\w+", lda_tup_words[topic])
+    my_elements = [2, 5, 8]
+
+    # Concatenate the top 3 words together and save to list
+    my_name = ''.join([my_words[i] for i in my_elements])
+    my_name1 = 'lda_' + my_name
+    lad_topic_names.append(my_name1)
+
+# Save the topic names
+topic_name_dict = {
+    "topic_number": list(range(0, 22)),
+    "topic_names": lad_topic_names
+}
+
+lda_topic_name_df = pd.DataFrame(topic_name_dict)
+
+# Save the dataframe
+cmips_lda_df.to_csv("data/participants/features/cmips_feature_set_05_lda.csv")
+lda_topic_name_df.to_csv("data/participants/features/lda_topic_name_df.csv")
 
 #endregion
 
 #region EXECUTE THE TOPIC MODELS WITH GSDMM
-
-# Get the number of words per post
-words_per_post = []
-
-for i in range(len(cmips_words_cleaned)):
-    words_per_post.append(len(cmips_words_cleaned[i]))
-
-# Histogram of words per post
-plt.hist(x=words_per_post)
-plt.show()
-
-# Descriptive statistic of words per post
-print(np.mean(words_per_post))
-print(np.std(words_per_post))
-print(len([num for num in words_per_post if num <= 50]) / len(words_per_post))
-
-# GSDMM ALGORITHM
 
 # Create the vocabulary
 vocab = set(x for doc in cmips_words_cleaned for x in doc)
@@ -442,14 +435,10 @@ post_count_04 = np.array(mgp_04.cluster_doc_count)
 print('Beta = 0.4. The number of posts per topic: ', post_count_04)
 
 # Train the GSDMM model, beta = 0.3
-start_time = time.time()
 mgp_03 = MovieGroupProcess(K=30, alpha=0.1, beta=0.3, n_iters=40)
 gsdmm_b03 = mgp_03.fit(docs=cmips_words_cleaned, vocab_size=n_terms)
 post_count_03 = np.array(mgp_03.cluster_doc_count)
 print('Beta = 0.3. The number of posts per topic: ', post_count_03)
-end_time = time.time()
-processing_time = end_time - start_time
-print(processing_time / 60)
 
 # Train the GSDMM model, beta = 0.2
 mgp_02 = MovieGroupProcess(K=30, alpha=0.1, beta=0.2, n_iters=40)
@@ -475,57 +464,31 @@ beta_08 = [x for x in post_count_08 if x > 0]
 beta_09 = [x for x in post_count_09 if x > 0]
 beta_10 = [x for x in post_count_10 if x > 0]
 
-# Make lists the same size, transform in array
-beta_01 = np.sort(np.array(beta_01))
-beta_02 = np.sort(np.append(np.repeat(0, [len(beta_01)-len(beta_02)]), beta_02))
-beta_03 = np.sort(np.append(np.repeat(0, [len(beta_01)-len(beta_03)]), beta_03))
-beta_04 = np.sort(np.append(np.repeat(0, [len(beta_01)-len(beta_04)]), beta_04))
-beta_05 = np.sort(np.append(np.repeat(0, [len(beta_01)-len(beta_05)]), beta_05))
-beta_06 = np.sort(np.append(np.repeat(0, [len(beta_01)-len(beta_06)]), beta_06))
-beta_07 = np.sort(np.append(np.repeat(0, [len(beta_01)-len(beta_07)]), beta_07))
-beta_08 = np.sort(np.append(np.repeat(0, [len(beta_01)-len(beta_08)]), beta_08))
-beta_09 = np.sort(np.append(np.repeat(0, [len(beta_01)-len(beta_09)]), beta_09))
-beta_10 = np.sort(np.append(np.repeat(0, [len(beta_01)-len(beta_10)]), beta_10))
+# Optimal number of topics
+num_topic_sum = len(beta_01) + len(beta_02) + len(beta_03) + len(beta_04) + len(beta_05) + len(beta_06) + len(beta_07) + len(beta_08) + len(beta_09) + len(beta_10)
+gsdmm_topic_average = num_topic_sum / 10
 
-# Append all topics
-n_posts = np.append(beta_01, [beta_02, beta_03, beta_04, beta_05, beta_06, beta_07, beta_08, beta_09, beta_10])
-
-# Create list of topic numbers
-topic_numbers = [17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1] * 10
-
-# Create a list of beta values
-beta_list = [[0.1] * 17] + [[0.2] * 17] + [[0.3] * 17] + [[0.4] * 17] + [[0.5] * 17] + [[0.6] * 17] + [[0.7] * 17] + [[0.8] * 17] + [[0.9] * 17] + [[1.0] * 17]
-beta_values = [item for sublist in beta_list for item in sublist]
-
-# Double check that the betas are same length as topic numbers
-print(len(topic_numbers) == len(n_posts) == len(beta_values))
-
-# Create data frame for plotting
-list_of_tuples = list(zip(beta_values, topic_numbers, n_posts))
-gsdmm_df = pd.DataFrame(list_of_tuples, columns=['beta', 'topic_numbers', 'n_posts'])
-
-# Make grid plot
-sns.set_theme(style="white")
-gsdmm_plot = sns.FacetGrid(gsdmm_df, col='beta', col_wrap=2)
-gsdmm_plot.map(sns.barplot, 'topic_numbers', 'n_posts', color='cornflowerblue')
-gsdmm_plot.set_axis_labels("Topic Numbers", "Number of Posts")
-gsdmm_plot.savefig('plots/gsdmm_topics.png')
-
-# Optimal number of topics?
-print('The optimal number of topics in GSDMM, based on average, is: ', (6 + 4 + 3 + 4 + 2 + 2 + 1 + 2 + 2 + 1) / 10)
-
-# Since optimal number of plots is GSDMM is 2.7, round to 3---use model where beta = 0.3
+# Since optimal number of plots is GSDMM is 7.5---use model where beta = 0.3 (~7 topics)
 
 # Rearrange the topics in order of importance
-top_index = post_count_03.argsort()[-17:][::-1]
+top_index = post_count_03.argsort()[-30:][::-1]
 
 # Get the top 15 words per topic
+stdoutOrigin=sys.stdout
+sys.stdout = open("data/participants/features/gsdmm_log.txt", "w")
 top_words(mgp_03.cluster_word_distribution, top_cluster=top_index, values=15)
+sys.stdout.close()
+sys.stdout=stdoutOrigin
+
+# Code above is throwing type error, so use this workaround
+import json
+with open('data/participants/features/gsdmm_log.txt', 'w') as file:
+    file.write(json.dumps(mgp_03.cluster_word_distribution))
 
 # Initialize empty list
 gsdmm_topics = []
 
-# Predict the topic for each set of words in a Reddit post
+# Predict the topic for each set of words
 for i in range(len(cmips_words_cleaned)):
     gsdmm_topics.append(mgp_03.choose_best_label(cmips_words_cleaned[i]))
 
@@ -534,7 +497,7 @@ topic_classes = []
 topic_probs = []
 
 # For each post, extract the dominant topic from the topic distribution
-for i in range(len(cmips_text_original)):
+for i in range(len(cmips_text)):
 
     # Extract the dominant topic
     topic_class = gsdmm_topics[i][0]
@@ -545,24 +508,13 @@ for i in range(len(cmips_text_original)):
     topic_probs.append(topic_prob)
 
 # Prepare to merge with original dataframe
-gsdmm_cmips_df = cmips.loc[:, ['author', 'body', 'permalink']]
+gsdmm_cmips_df = cmips.loc[:, ['participant_id', 'timestamp']]
 
 # Add the dominant topics and strengths
-gsdmm_cmips_df['topic'] = topic_classes
-gsdmm_cmips_df['topic_probability'] = topic_probs
+gsdmm_cmips_df['gsdmm_predicted_topic'] = topic_classes
+gsdmm_cmips_df['gsdmm_topic_probability'] = topic_probs
 
-# Sort the data frame
-gsdmm_cmips_df = gsdmm_cmips_df.sort_values(by=['topic', 'topic_probability'], ascending=[False, False])
-
-# Select the 10 most illustrative posts per topic
-topics_to_quote = gsdmm_cmips_df.groupby('topic').head(10)
-
-# Save the data frame for easy reading
-topics_to_quote.to_csv("data/results/gsdmm_topics_to_quote.csv")
-
-# Percentage of posts with each top 3 topic
-print(post_count_03[29] / len(cmips_words_cleaned))
-print(post_count_03[13] / len(cmips_words_cleaned))
-print(post_count_03[5] / len(cmips_words_cleaned))
+# Save file
+gsdmm_cmips_df.to_csv("data/participants/features/cmips_feature_set_05_gsdmm.csv")
 
 #endregion

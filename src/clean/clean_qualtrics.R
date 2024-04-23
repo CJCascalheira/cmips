@@ -523,6 +523,36 @@ for (i in 1:ncol(temp_scales)) {
   print(range(temp_scales[i], na.rm = TRUE))
 }
 
+# * SMBS ------------------------------------------------------------------
+
+# Check range of values
+temp_scales <- cmips_qualtrics %>%
+  select(starts_with("SMBS"))
+temp_scales
+
+for (i in 1:ncol(temp_scales)) {
+  print(range(temp_scales[i], na.rm = TRUE))
+}
+
+# Fix scoring
+cmips_qualtrics <- cmips_qualtrics %>%
+  mutate(across(SMBS_fb_1:SMBS_tw_17, ~ recode(., `3` = 0, `2` = 1)))
+
+# Recheck range of values
+temp_scales <- cmips_qualtrics %>%
+  select(starts_with("SMBS"))
+temp_scales
+
+for (i in 1:ncol(temp_scales)) {
+  print(range(temp_scales[i], na.rm = TRUE))
+}
+
+# * Stress-Related Posts --------------------------------------------------
+
+# Recode
+cmips_qualtrics <- cmips_qualtrics %>%
+  mutate(sm_post = recode(sm_post, "Yes" = 1, "No" = 0))
+
 # MISSING DATA ------------------------------------------------------------
 
 # Select the scales
@@ -706,6 +736,76 @@ gad_total <- cmips_qualtrics %>%
   summarize(GAD7_total = sum(scores))
 gad_total
 
+# * SMBS ------------------------------------------------------------------
+
+# Extract the data for FB and TW separately
+SMBS_fb <- cmips_qualtrics %>%
+  select(ParticipantID, starts_with("SMBS_fb"))
+
+SMBS_tw <- cmips_qualtrics %>%
+  select(ParticipantID, starts_with("SMBS_tw"))
+
+# Create new variable names
+new_smbs_names = c("ParticipantID")
+
+for (i in 1:17) {
+  new_smbs_names = c(new_smbs_names, paste0("SMBS_", i))
+}
+
+# Rename the columns
+names(SMBS_fb) <- new_smbs_names
+names(SMBS_tw) <- new_smbs_names
+
+# Score the SMBS variable
+SMBS_total <- bind_rows(SMBS_fb, SMBS_tw) %>%
+  pivot_longer(cols = SMBS_1:SMBS_17, names_to = "SMBS", values_to = "values") %>%
+  group_by(ParticipantID, SMBS) %>%
+  summarize(total = sum(values, na.rm = TRUE)) %>% 
+  mutate(total = if_else(total == 2, 1, total)) %>%
+  ungroup() %>%
+  group_by(ParticipantID) %>%
+  summarize(SMBS_total = sum(total))
+
+# * Stress-Related Posts --------------------------------------------------
+
+# Already scored, but change variable name
+cmips_qualtrics <- cmips_qualtrics %>%
+  mutate(stress_posting = sm_post)
+
+# * Stress-Related Content ------------------------------------------------
+
+# Score as a count
+stress_n_content <- cmips_qualtrics %>%
+  select(ParticipantID, sm_conten) %>%
+  mutate(
+    stress_n_content = str_count(sm_conten, ","),
+    stress_n_content = stress_n_content + 1,
+    stress_n_content = if_else(is.na(stress_n_content), 0, stress_n_content)
+  ) %>%
+  select(-sm_conten)
+
+# * Frequency of Posting --------------------------------------------------
+
+# Recode and then create the variable
+high_freq_posting <- cmips_qualtrics %>%
+  mutate(
+    freq_fb = recode(sm_freq_fb, "I have Facebook, but never login" = 0,
+                     "Yearly or less" = 0, "Every few months" = 0, 
+                     "Monthly" = 0, "Weekly" = 0, "Once a day" = 0,
+                     "Multiple times a day" = 1),
+    freq_tw = recode(sm_freq_tw, "I have Facebook, but never login" = 0,
+                     "Yearly or less" = 0, "Every few months" = 0, 
+                     "Monthly" = 0, "Weekly" = 0, "Once a day" = 0,
+                     "Multiple times a day" = 1)
+  ) %>%
+  select(ParticipantID, freq_fb, freq_tw) %>%
+  mutate(
+    freq_fb = if_else(is.na(freq_fb), 0, freq_fb),
+    freq_tw = if_else(is.na(freq_tw), 0, freq_tw)
+  ) %>%
+  unite(col = "high_freq_posting", freq_fb:freq_tw, sep = "") %>%
+  mutate(high_freq_posting = if_else(high_freq_posting == "00", 0, 1))
+
 # * COMBINE ALL AGGREGATE SCORES ------------------------------------------
 
 # Combine the scores
@@ -720,7 +820,10 @@ cmips_qualtrics <- left_join(cmips_qualtrics, bsmas_total) %>%
   left_join(dudit_total) %>%
   left_join(audit_total) %>%
   left_join(phq_total) %>%
-  left_join(gad_total)
+  left_join(gad_total) %>%
+  left_join(stress_n_content) %>%
+  left_join(high_freq_posting) %>%
+  left_join(SMBS_total)
 
 # EXPORT DATA -------------------------------------------------------------
 

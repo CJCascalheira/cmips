@@ -66,10 +66,6 @@ social_media_posts <- social_media_posts %>%
 # How many posts with missing data removed?
 nrow(social_media_posts)
 
-# Remove the NA characters that were converted to NA strings
-social_media_posts <- social_media_posts %>%
-  mutate(posts_comments = str_remove_all(posts_comments, "NA "))
-
 # ...2) Add Covariates ----------------------------------------------------
 
 # Add covariates to the data
@@ -111,7 +107,17 @@ social_media_posts <- social_media_posts %>%
 
 # Remove empty posts
 social_media_posts <- social_media_posts %>%
-  filter(posts_comments != "NA")
+  filter(posts_comments != "NA") %>%
+  # Remove "NA" and "RT" from the text
+  mutate(
+    posts_comments = str_remove_all(posts_comments, regex("^NA | NA | NA$", ignore_case = TRUE)),
+    posts_comments = str_remove_all(posts_comments, regex("^RT | RT | RT$", ignore_case = TRUE))
+  ) %>%
+  # Trim White space
+  mutate(posts_comments = str_trim(posts_comments)) %>%
+  # Remove empty posts
+  filter(!is.na(posts_comments)) %>%
+  filter(posts_comments != "")
 
 # Copy the full, mostly unprocessed text for behavioral engagement, embeddings,
 # and LIWC
