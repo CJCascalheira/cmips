@@ -10,6 +10,7 @@
 
 # Load libraries
 library(tidyverse)
+library(rjson)
 
 # Import feature sets
 cmips_feature_set_00 <- read_csv("data/participants/features/cmips_feature_set_00.csv") %>%
@@ -28,5 +29,9 @@ cmips_feature_set_05_gsdmm <- read_csv("data/participants/features/cmips_feature
 
 # Import additional data
 lda_topic_name_df <- read_csv("data/participants/features/lda_topic_name_df.csv")
+gsdmm_log <- fromJSON(file="data/participants/features/gsdmm_log.json")
 
 # For LDA topics, need to pivot into wide format and rename topics
+
+# For GSDMM topics, need to organize the top words and assign names
+

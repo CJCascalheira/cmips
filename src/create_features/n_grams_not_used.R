@@ -9,22 +9,96 @@
 # The following features are created:
 # - Ngrams
 
-# 1) OPEN VOCABULARY ------------------------------------------------------
+# Decided to use caution with n-grams because the sample is so small--the n-grams being
+# produced were person-dependent (i.e., unique names) that would likely not
+# generalize to other models.
 
-# ...1a) N-GRAMS ----------------------------------------------------------
+# LOAD DEPENDENCIES AND IMPORT --------------------------------------------
+
+# Load libraries
+library(tidyverse)
+library(tidytext)
+
+# Import data
+cmips_social_media <- read_csv("data/participants/cleaned/social_media_posts_cleaned.csv")
+cmips_surveys <- read_csv("data/participants/for_analysis/cmips_surveys_full.csv")
+
+# PREPROCESS --------------------------------------------------------------
+
+# Select just participants who shared their data
+participant_ids <- cmips_social_media %>%
+  distinct(participant_id)
+
+# Filter the survey
+cmips_surveys <- cmips_surveys %>%
+  filter(ParticipantID %in% participant_ids$participant_id)
+
+# Merge all social media data to participant level
+cmips_social_media <- cmips_social_media %>%
+  group_by(participant_id) %>%
+  summarize(posts_comments = paste(posts_comments, collapse = " ")) %>%
+  # Rename the posts variable
+  rename(text = posts_comments)
+
+# Distinguish between the most stressed vs. least stressed people
+cmips_stress_aggregate <- cmips_surveys %>%
+  select(ParticipantID, stress_posting, starts_with("label")) %>%
+  # Unite the stress labels
+  mutate(
+    total_above_mean_stress = select(., label_StressCT:label_IHS_mean) %>% 
+      rowSums(na.rm = TRUE)
+  ) %>%
+  # Drop the labels
+  select(-starts_with("label"))
+
+# What is the mean aggregate stress
+mean_stressors <- mean(cmips_stress_aggregate$total_above_mean_stress)
+
+# People with highest level of stress who are most likely to disclose stress 
+# based on their self-report in survey
+participants_disclose_high_stress <- cmips_stress_aggregate %>%
+  # People who post about stress
+  filter(stress_posting == 1) %>%
+  # People above the mean of the total_above_mean_stress composite variable
+  filter(total_above_mean_stress > mean_stressors) %>%
+  pull(ParticipantID)
+length(participants_disclose_high_stress)
+
+# People with lowest level of stress who are least likely to disclose stress 
+# based on their self-report in survey
+participants_no_disclose_low_stress <- cmips_stress_aggregate %>%
+  # People who DO NOT post about stress
+  filter(stress_posting == 0) %>%
+  # People below the mean of the total_above_mean_stress composite variable
+  filter(total_above_mean_stress < mean_stressors) %>%
+  pull(ParticipantID)
+length(participants_no_disclose_low_stress)
+
+# Create a stress variable to serve as n-grams label
+cmips_social_media <- cmips_social_media %>%
+  # Get the participants for whom the variable can be calculated
+  filter(participant_id %in% c(participants_no_disclose_low_stress, 
+                               participants_disclose_high_stress)) %>%
+  # Create the variable
+  mutate(
+    composite_stress = if_else(participant_id %in% participants_disclose_high_stress, 
+                               1, 0)
+  )
+
+# 1) N-GRAMS --------------------------------------------------------------
 
 # Top unigrams
 unigram_df <- cmips_social_media %>%
-  # Select key columns
-  select(participant_id, timestamp, text, label_minority_stress) %>%
   # Generate unigrams
   unnest_tokens(word, text, drop = FALSE) %>%
   # Remove stop words
-  count(label_minority_stress, word) %>%
+  count(composite_stress, word) %>%
   arrange(desc(n)) %>%
+  # Remove stop words
+  filter(!(word %in% stop_words$word)) %>%
   # Clean up based on remaining stop words
   mutate(
-    stop_word = if_else(str_detect(word, regex("^im$|that's|i’m|it’s|you’re|don’t|dont|It|can’t|lt|he’s|she’s|i’ve|doesn’t|didn’t|isn’t|there’s|that'll|how’s|they’ll|it’ll|would've|we’ll|they’ve|shouldn’t|that’s|i’ll|they’re|aren’t|i’d|won’t|what’s|you’ve|we’re|wouldn’t|haven’t|wasn’t|y'all|let’s|here’s|who’s|you’ll|couldn’t|weren’t|hasn’t|we’ve|ain’t|you’d|y’all")), 1, 0) 
+    stop_word = if_else(str_detect(word, regex("^na$|^im$|that's|i’m|it’s|you’re|don’t|dont|It|can’t|lt|he’s|she’s|i’ve|doesn’t|didn’t|isn’t|there’s|that'll|how’s|they’ll|it’ll|would've|we’ll|they’ve|shouldn’t|that’s|i’ll|they’re|aren’t|i’d|won’t|what’s|you’ve|we’re|wouldn’t|haven’t|wasn’t|y'all|let’s|here’s|who’s|you’ll|couldn’t|weren’t|hasn’t|we’ve|ain’t|you’d|y’all")), 1, 0) 
   ) %>%
   # Remove remaining stop words
   filter(stop_word == 0) %>%
@@ -33,14 +107,10 @@ unigram_df <- cmips_social_media %>%
 # TF-IDF unigrams
 unigram_vector <- unigram_df %>%
   # Calculate tf-idf
-  bind_tf_idf(word, label_minority_stress, n) %>%
-  # Get top tf-idf of unigrams for minority stress posts
+  bind_tf_idf(word, composite_stress, n) %>%
+  # Get top tf-idf of unigrams for composite stress posts
   arrange(desc(tf_idf)) %>%
-  filter(label_minority_stress == 1) %>%
-  # Remove words based on close inspection of unigrams
-  mutate(remove = if_else(str_detect(word, regex("’s|’d|'s|	
-’ve|\\d|monday|tuesday|wednesday|thursday|friday|saturday|sunday|lockdown|covid|grammatical|film|eh|could’ve|december|vehicle|paint|ness|bout|brown|animals|âˆ|weather|bike|maria|albeit|amd|matt|minecraft|freind|have|𝙸|𝚠𝚒𝚕𝚕|𝚢𝚘𝚞|ᴍʏ|can‘t|causally")), 1, 0)) %>%
-  filter(remove == 0) %>%
+  filter(composite_stress == 1) %>%
   # Select the top 100 n-grams
   head(n = 100) %>%
   pull(word)
@@ -48,7 +118,7 @@ unigram_vector <- unigram_df %>%
 # Generate bigrams
 bigram_df <- cmips_social_media %>%
   # Select key columns
-  select(participant_id, timestamp, text, label_minority_stress) %>%
+  select(participant_id, text, composite_stress) %>%
   unnest_ngrams(bigram, text, n = 2, drop = FALSE) %>%
   # Separate the bigrams into two columns
   separate(bigram, c("word1", "word2")) %>%
@@ -63,20 +133,16 @@ bigram_df <- cmips_social_media %>%
   filter(stop_word1 == 0, stop_word2 == 0) %>%
   unite("bigram", c("word1", "word2"), sep = " ") %>%
   # Count top bigrams
-  count(label_minority_stress, bigram) %>%
+  count(composite_stress, bigram) %>%
   arrange(desc(n))
 
 # TF-IDF bigrams
 bigram_vector <- bigram_df %>%
   # Calculate tf-idf
-  bind_tf_idf(bigram, label_minority_stress, n) %>%
-  # Get top tf-idf of unigrams for minority stress posts
+  bind_tf_idf(bigram, composite_stress, n) %>%
+  # Get top tf-idf of unigrams for composite stress posts
   arrange(desc(tf_idf)) %>%
-  filter(label_minority_stress == 1) %>%
-  # Remove words based on close inspection of unigrams
-  mutate(remove = if_else(str_detect(bigram, regex("’s|’d|'s|	
-’ve|\\d|monday|tuesday|wednesday|thursday|friday|saturday|sunday|lockdown|covid|^ive |^lot |minutes ago|ame$")), 1, 0)) %>%
-  filter(remove == 0) %>%
+  filter(composite_stress == 1) %>%
   # Select the top 100 n-grams
   head(n = 100) %>%
   pull(bigram)
@@ -84,7 +150,7 @@ bigram_vector <- bigram_df %>%
 # Generate trigrams
 trigram_df <- cmips_social_media %>%
   # Select key columns
-  select(participant_id, timestamp, text, label_minority_stress) %>%
+  select(participant_id, text, composite_stress) %>%
   unnest_ngrams(trigram, text, n = 3, drop = FALSE) %>%
   # Separate into three columns
   separate(trigram, c("word1", "word2", "word3"), sep = " ") %>%
@@ -106,7 +172,7 @@ trigram_df <- cmips_social_media %>%
   ) %>%
   # Combine into trigrams
   unite("trigram", c("word1", "word2", "word3"), sep = " ") %>%
-  count(label_minority_stress, trigram) %>%
+  count(composite_stress, trigram) %>%
   arrange(desc(n))
 
 # TF-IDF Trigrams
@@ -115,15 +181,15 @@ trigram_vector <- trigram_df %>%
   mutate(remove = if_else(str_detect(trigram, "\\d|ðÿ|^amp |amp | amp$|NA NA NA|poll$|jfe|_link|link_|playlist 3948ybuzmcysemitjmy9jg si|complete 3 surveys|gmail.com mailto:hellogoodbis42069 gmail.com|hellogoodbis42069 gmail.com mailto:hellogoodbis42069|comments 7n2i gay_marriage_debunked_in_2_minutes_obama_vs_alan|debatealtright comments 7n2i|gift card|amazon|action hirewheller csr|energy 106 fm|form sv_a3fnpplm8nszxfb width|â íœê í|âˆ âˆ âˆ"), 1, 0)) %>%
   filter(remove == 0) %>%
   # Calculate tf-idf
-  bind_tf_idf(trigram, label_minority_stress, n) %>%
-  # Get top tf-idf of unigrams for minority stress posts
+  bind_tf_idf(trigram, composite_stress, n) %>%
+  # Get top tf-idf of unigrams for composite stress posts
   arrange(desc(tf_idf)) %>%
-  filter(label_minority_stress == 1) %>%
+  filter(composite_stress == 1) %>%
   # Select the top 100 n-grams
   head(n = 100) %>%
   pull(trigram)
 
-# ...1b) ASSIGN N-GRAMS ---------------------------------------------------
+# 2) ASSIGN N-GRAMS -------------------------------------------------------
 
 # Assign the unigrams as features
 for (i in 1:length(unigram_vector)) {
