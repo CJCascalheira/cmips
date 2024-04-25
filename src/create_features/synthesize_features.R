@@ -21,6 +21,7 @@ cmips_feature_set_00 <- read_csv("data/participants/features/cmips_feature_set_0
 # Behavioral engagement
 cmips_feature_set_01 <- read_csv("data/participants/features/cmips_feature_set_01.csv")
 
+# Lexicons
 cmips_feature_set_02 <- read_csv("data/participants/features/cmips_feature_set_02.csv") %>%
   select(-text)
 

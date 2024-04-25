@@ -4,6 +4,8 @@ FROM `fh-bigquery.reddit_posts.2019*`
 WHERE subreddit = 'askscience'
 
 # Download using the fh-bigquery/reddit_posts datasets
+# https://console.cloud.google.com/bigquery?pli=1&project=atlesh&ws=!1m0
+# https://console.cloud.google.com/bigquery
 
 # For DASS classifier, download for years 2016, 2017, 2018, 2019 from
 # DASS CONDITIONS
@@ -11,6 +13,7 @@ WHERE subreddit = 'askscience'
 # r/Anxiety
 # r/SuicideWatch
 # r/Stress
+# r/ptsd
 
 # CONTROL CONDITIONS
 # r/movies
