@@ -137,13 +137,6 @@ cmips_df <- cmips_df %>%
   ) %>%
   ungroup()
 
-
-
-cmips_df <- cmips_df %>%
-  sample_n(size = 1000)
-
-
-
 # Do some basic cleaning up 
 cmips_df <- cmips_df %>%
   # Remove URLs
@@ -444,6 +437,24 @@ for (i in 1:length(bigram_vector_stress)) {
   # Add the n-gram to the dataframe
   cmips_df[[ngram]] <- as.integer(x)  
 }
+
+# NUMBERS OF N-GRAMS  -----------------------------------------------------
+
+# Add counts of n-grams to stress & relax dataset
+stress_relax_df <- stress_relax_df %>%
+  mutate(
+    n_unigrams = select(., beautiful:fist) %>% rowSums(),
+    n_bigrams = select(., `be happy`:`be never`) %>% rowSums()
+  ) %>%
+  select(relax, stress, post_id, text, n_unigrams, n_bigrams, everything())
+
+# Add counts of n-grams to CMIPS dataset
+cmips_df <- cmips_df %>%
+  mutate(
+    n_unigrams = select(., beautiful:fist) %>% rowSums(),
+    n_bigrams = select(., `be happy`:`be never`) %>% rowSums()
+  ) %>%
+  select(participant_id, timestamp, text, n_unigrams, n_bigrams, everything())
 
 # EXPORT ------------------------------------------------------------------
 
