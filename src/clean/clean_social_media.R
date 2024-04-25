@@ -66,23 +66,7 @@ social_media_posts <- social_media_posts %>%
 # How many posts with missing data removed?
 nrow(social_media_posts)
 
-# ...2) Add Covariates ----------------------------------------------------
-
-# Add covariates to the data
-social_media_posts <- social_media_posts %>%
-  left_join(participants_shared_both_fbtw) %>%
-  left_join(participants_shared_more_one_year) %>%
-  # Convert NAs to zeros
-  mutate(
-    covariate_both_fbtw = if_else(is.na(covariate_both_fbtw), 0, covariate_both_fbtw),
-    covariate_more_one_year = if_else(is.na(covariate_more_one_year), 0, covariate_more_one_year)
-  )
-
-# Check work
-table(social_media_posts$covariate_both_fbtw)
-table(social_media_posts$covariate_more_one_year)
-
-# ...3) NLP Preprocessing ------------------------------------------------
+# ...2) NLP Preprocessing ------------------------------------------------
 
 # Do some basic cleaning up - shared across all features
 social_media_posts <- social_media_posts %>%
@@ -217,6 +201,31 @@ social_media_posts_cleaned <- social_media_posts_cleaned %>%
   distinct(participant_id, timestamp, .keep_all = TRUE) %>%
   select(-word)
 social_media_posts_cleaned
+
+# ...3) Add Covariates ----------------------------------------------------
+
+# Add covariates to the data
+social_media_posts_cleaned <- social_media_posts_cleaned %>%
+  left_join(participants_shared_both_fbtw) %>%
+  left_join(participants_shared_more_one_year) %>%
+  # Convert NAs to zeros
+  mutate(
+    covariate_both_fbtw = if_else(is.na(covariate_both_fbtw), 0, covariate_both_fbtw),
+    covariate_more_one_year = if_else(is.na(covariate_more_one_year), 0, covariate_more_one_year)
+  )
+
+social_media_posts_full <- social_media_posts_full %>%
+  left_join(participants_shared_both_fbtw) %>%
+  left_join(participants_shared_more_one_year) %>%
+  # Convert NAs to zeros
+  mutate(
+    covariate_both_fbtw = if_else(is.na(covariate_both_fbtw), 0, covariate_both_fbtw),
+    covariate_more_one_year = if_else(is.na(covariate_more_one_year), 0, covariate_more_one_year)
+  )
+
+# Check work
+table(social_media_posts_cleaned$covariate_both_fbtw)
+table(social_media_posts_cleaned$covariate_more_one_year)
 
 # EXPORT DATA -------------------------------------------------------------
 

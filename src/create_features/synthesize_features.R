@@ -51,6 +51,6 @@ gsdmm_log <- fromJSON(file="data/participants/features/gsdmm_log.json")
 
 # For GSDMM topics, need to organize the top words and assign names
 
-
+# Make sure lexicons and n-grams do not overlap
 
 

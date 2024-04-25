@@ -28,9 +28,10 @@ If you use the bot detection tactics (BDTs) in your work, please cite the corres
 
 **Create Features / NLP-Generated Independent Variables**
 10. src/create_features/create_features_*
-11. src/create_features/synthesize_features.R
+11. src/create_features/create_features_dassp/*
+12. src/create_features/synthesize_features.R
 
 **Analyze, Part II**
-12. src/analyze/describe_social_media.R
-13. src/analyze/describe_participants.R
-14. src/analyze/describe_measures.R
+13. src/analyze/describe_social_media.R
+14. src/analyze/describe_participants.R
+15. src/analyze/describe_measures.R
