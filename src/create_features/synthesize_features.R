@@ -648,5 +648,33 @@ cmips_features <- cmips_df %>%
   # Merge with behavioral engagement
   left_join(cmips_feature_set_01)
 
+# Count features
+cmips_features %>%
+  select(starts_with("be"))
+
+cmips_features %>% 
+  select(contains("dsm5"))
+
+cmips_features %>% 
+  select(contains("_lexicon"), contains("sentiment_"))
+
+cmips_features %>% 
+  select(contains("lda"), contains("gsdmm"))
+
+cmips_features %>% 
+  select(contains("liwc"))
+
+cmips_features %>% 
+  select(contains("ngram"))
+
+cmips_features %>% 
+  select(contains("w2v"))
+
+cmips_features %>%
+  select(-starts_with("be"), -contains("dsm5"), -contains("_lexicon"), 
+         -contains("sentiment_"), -contains("lda"), -contains("gsdmm"),
+         -contains("liwc"), -contains("ngram"), -contains("w2v"),
+         -participant_id, -starts_with("covari"))
+
 # Export data
 write_csv(cmips_features, "data/participants/for_analysis/cmips_features.csv")
