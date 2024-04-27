@@ -249,6 +249,12 @@ cmips_social_media <- cmips_social_media %>%
   group_by(participant_id, timestamp) %>%
   # Calculate total sentiment of post
   summarize(sentiment_lexicon = sum(value)) %>%
+  # Split the sentiment into two column
+  mutate(
+    sentiment_overall_positive = if_else(sentiment_lexicon > 0, 1, 0),
+    sentiment_overall_negative = if_else(sentiment_lexicon < 0, 1, 0)
+  ) %>%
+  select(-sentiment_lexicon) %>%
   # Join to main dataframe
   left_join(cmips_social_media) %>%
   ungroup()

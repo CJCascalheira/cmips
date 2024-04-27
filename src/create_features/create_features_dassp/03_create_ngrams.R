@@ -5,7 +5,6 @@
 
 # The purpose of this script is to create DASSP n-grams.
 
-
 # LOAD DEPENDENCIES AND IMPORT --------------------------------------------
 
 # Libraries
