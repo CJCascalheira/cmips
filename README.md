@@ -38,3 +38,6 @@ If you use the bot detection tactics (BDTs) in your work, please cite the corres
 14. src/analyze/describe_social_media.R
 15. src/analyze/describe_participants.R
 16. src/analyze/describe_measures.R
+17. src/analyze/ml_modeling/classify_*.py
+18. src/analyze/ml_modeling/regress_*.py
+

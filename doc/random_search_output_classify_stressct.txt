@@ -1,0 +1,14 @@
+
+#############################################################
+TRAINING INFORMATION - RANDOM SEARCH - XGBOOST
+
+Best Parameters
+{'eta': 0.02137943371692049, 'lambda': 3, 'max_depth': 85, 'subsample': 0.5809810172862997}
+
+Best Score
+0.7138888888888888
+
+Best Index
+22
+
+All Parameters
