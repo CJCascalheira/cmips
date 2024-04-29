@@ -1,0 +1,16 @@
+
+#############################################################
+TRAINING INFORMATION - RANDOM SEARCH - LOGISTIC REGRESSION
+
+Best Parameters
+{'C': 0.5972877088380559, 'max_iter': 455, 'penalty': 'l2'}
+
+Best Score
+0.4866666666666667
+
+Best Index
+0
+
+All Parameters
+
+

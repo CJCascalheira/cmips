@@ -11,7 +11,10 @@
 # Load libraries
 library(tidyverse)
 library(readxl)
+library(tidytext)
 library(janitor)
+library(psych)
+library(scales)
 
 # Import data
 social_media_posts <- read_csv("data/participants/combined_social_media/social_media_posts_full.csv")
@@ -52,6 +55,19 @@ anti_join(participant_tracker_ids, extraction_reactions_ids) %>%
 social_media_posts_cleaned <- read_csv("data/participants/cleaned/social_media_posts_cleaned.csv")
 
 social_media_reactions_cleaned <- read_csv("data/participants/cleaned/social_media_reactions.csv")
+
+# Import LIWC data
+liwc <- read_csv("data/participants/features/cmips_feature_set_00.csv")
+
+# Import features
+cmips_features <- read_csv("data/participants/for_analysis/cmips_features.csv") %>%
+  select(participant_id, starts_with("fmean"), starts_with("be_"))
+
+# Import survey
+cmips_surveys <- read_csv("data/participants/for_analysis/cmips_surveys_full.csv") %>%
+  rename(participant_id = ParticipantID) %>%
+  filter(participant_id %in% cmips_features$participant_id) %>%
+  select(participant_id, starts_with("label"))
 
 # ANALYZE RAW DATA ---------------------------------------------------------
 
@@ -116,9 +132,6 @@ participants_shared_more_one_year <- anti_join(social_media_posts, sm_posts,
 nrow(social_media_posts) - nrow(sm_posts)
 1 - (nrow(sm_posts) / nrow(social_media_posts))
 
-# ANALYZE PREPROCESSED DATA -----------------------------------------------
-
-
 # EXPORT IDS TO MAKE COVARIATES -------------------------------------------
 
 # Save file to make covariates
@@ -127,3 +140,65 @@ write_csv(participants_shared_more_one_year, "data/participants/util/participant
 
 # Save file of participants who shared the wrong social media data
 write_csv(shared_wrong_data, "data/participants/util/shared_wrong_data.csv")
+
+# ANALYZE PREPROCESSED DATA -----------------------------------------------
+
+# How many posts and reactions after preprocessing?
+nrow(social_media_posts_cleaned)
+nrow(social_media_reactions_cleaned)
+
+# Descriptive statistics of word counts
+describe(liwc$WC)
+
+# DESCRIPTIVE ANALYSIS OF FEATURES ----------------------------------------
+
+# ...1) Visualizations ----------------------------------------------------
+
+# Bar chart of top 30 words
+wc_bar_plot <- social_media_posts_cleaned %>%
+  unnest_tokens(output = "word", input = "posts_comments") %>%
+  # Remove stop words
+  filter(!(word %in% stop_words$word)) %>%
+  count(word) %>%
+  arrange(desc(n)) %>%
+  head(n = 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n)) +
+  geom_bar(stat="identity", fill="steelblue") + 
+  coord_flip() +
+  scale_y_continuous(label = comma, breaks = pretty_breaks(n = 10)) +
+  theme_bw() + 
+  theme(text = element_text(family = "serif")) +
+  labs(
+    x = "Word in Social Media Posts",
+    y = "Word Count"
+  )
+wc_bar_plot
+
+# Save the plot
+ggsave(filename = "results/plots/wc_bar_plot.png", plot = wc_bar_plot,
+       width = 8, height = 5)
+
+# ...2) Behavioral Engagement ---------------------------------------------
+
+# Get the behavioral engagement metrics
+be_engage <- cmips_features %>%
+  select(starts_with("be_"))
+
+# Descriptives of each BE feature
+describe(be_engage$be_avg_12_6)
+describe(be_engage$be_avg_n_urls)
+describe(be_engage$be_avg_hashtags)
+describe(be_engage$be_avg_daily_posts)
+describe(be_engage$be_total_n_posts)
+describe(be_engage$be_total_n_reactions)
+describe(be_engage$be_max_posts_day)
+
+# ...3) Group Comparisons -------------------------------------------------
+
+# Select the data for group comparisons
+cmips_groups <- cmips_features %>%
+  select(participant_id, contains("_dsm5"), contains("sentiment"), 
+         contains("_liwc"), contains("_lexicon"))
+
+# Merge with labels
+cmips_groups <- left_join(cmips_surveys, cmips_groups)

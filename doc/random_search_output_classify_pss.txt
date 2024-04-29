@@ -1,0 +1,16 @@
+
+#############################################################
+TRAINING INFORMATION - RANDOM SEARCH - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 28, 'max_features': 0.5771076262767284, 'n_estimators': 433}
+
+Best Score
+0.678888888888889
+
+Best Index
+67
+
+All Parameters
+
+

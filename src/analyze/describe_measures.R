@@ -190,8 +190,27 @@ kurtosi(cmips_surveys$CLCS_total) /  KurtosisSE(cmips_surveys$CLCS_total)
 
 # CLASS BALANCE OF OUTCOMES -----------------------------------------------
 
+table(cmips_surveys$label_StressTH)
+table(cmips_surveys$label_StressCT)
+table(cmips_surveys$label_PSS_total)
+table(cmips_surveys$label_LEC_total)
+table(cmips_surveys$label_DHEQ_mean)
+table(cmips_surveys$label_OI_mean)
+table(cmips_surveys$label_SOER_total)
+table(cmips_surveys$label_IHS_mean)
 
 # CONVERGENT VALIDITY SOER ------------------------------------------------
 
 # Test whether scores on the Negative Expectations subscale are correlated with 
-# scores on the DHEQ, OI, and IHS with a strength of ≥ .50 (Swank & Mullen, 2017). 
+# scores on other psychosocial stressor measures with a strength of ≥ .50 
+# (Swank & Mullen, 2017). 
+cmips_surveys %>%
+  select(ends_with("total"), ends_with("mean")) %>%
+  select(-starts_with("label"), -SMBS_total, -CLCS_total, -BSMAS_total) %>%
+  cor()
+
+cmips_surveys %>%
+  select(missing_strain, SOER_total, StressTH, StressCT) %>%
+  filter(missing_strain == 0) %>%
+  select(-missing_strain) %>%
+  cor()

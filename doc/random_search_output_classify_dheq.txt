@@ -1,0 +1,16 @@
+
+#############################################################
+TRAINING INFORMATION - RANDOM SEARCH - DECISION TREE
+
+Best Parameters
+{'criterion': 'entropy', 'max_depth': 52}
+
+Best Score
+0.5855555555555555
+
+Best Index
+0
+
+All Parameters
+
+
