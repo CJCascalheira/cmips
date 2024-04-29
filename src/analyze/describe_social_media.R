@@ -15,6 +15,7 @@ library(tidytext)
 library(janitor)
 library(psych)
 library(scales)
+library(lsr) # Cohen's D
 
 # Import data
 social_media_posts <- read_csv("data/participants/combined_social_media/social_media_posts_full.csv")
@@ -202,3 +203,419 @@ cmips_groups <- cmips_features %>%
 
 # Merge with labels
 cmips_groups <- left_join(cmips_surveys, cmips_groups)
+
+# ......3a) Lifetime Stressor Severity ------------------------------------
+
+# Filter the data
+cmips_groups_long <- cmips_groups %>%
+  select(label_StressTH, starts_with("fmean")) %>%
+  rename(stress_group = label_StressTH) %>%
+  pivot_longer(cols = starts_with("fmean"), names_to = "variable", values_to = "value")
+
+# Execute the independent samples t-tests w/o variance equality assumption
+test_results <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) t.test(value~stress_group, x))
+print(test_results)
+
+# Bonferroni correction value
+bonf_value <- 0.05 / length(names(test_results))
+
+# Extract data from list into df, next few lines
+
+# Prepare vectors
+t_stat <- c()
+p_val <- c()
+deg_free <- c()
+
+# For loop to extract data
+for (i in 1:length(names(test_results))) {
+  t_stat <- c(t_stat, test_results[[i]]$statistic)
+  p_val <- c(p_val, test_results[[i]]$p.value)
+  deg_free <- c(deg_free, test_results[[i]]$parameter)
+}
+
+# Effect size using Cohen's D
+# https://rcompanion.org/handbook/I_03.html
+effect_sizes <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) cohensD(value~stress_group, x)) %>%
+  as_vector()
+
+# Get LIWC vars names
+variable_names <- names(test_results)
+
+# Add all vectors into df
+test_signf_results <- data.frame(variable_names, t_stat, deg_free, effect_sizes, p_val) %>%
+  as_tibble() %>%
+  # Set Bonferroni value and determine if p_val is beyond/more extreme
+  mutate(bonf_value = bonf_value) %>%
+  mutate(signf_at_bonf = p_val < bonf_value) %>%
+  # Keep only significant differences
+  filter(signf_at_bonf == TRUE)
+test_signf_results
+
+# Save data to csv
+write_csv(test_signf_results, "results/group_comparisons/label_StressTH.csv")
+
+# ......3a) Lifetime Stressor Count ------------------------------------
+
+# Filter the data
+cmips_groups_long <- cmips_groups %>%
+  select(label_StressCT, starts_with("fmean")) %>%
+  rename(stress_group = label_StressCT) %>%
+  pivot_longer(cols = starts_with("fmean"), names_to = "variable", values_to = "value")
+
+# Execute the independent samples t-tests w/o variance equality assumption
+test_results <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) t.test(value~stress_group, x))
+print(test_results)
+
+# Bonferroni correction value
+bonf_value <- 0.05 / length(names(test_results))
+
+# Extract data from list into df, next few lines
+
+# Prepare vectors
+t_stat <- c()
+p_val <- c()
+deg_free <- c()
+
+# For loop to extract data
+for (i in 1:length(names(test_results))) {
+  t_stat <- c(t_stat, test_results[[i]]$statistic)
+  p_val <- c(p_val, test_results[[i]]$p.value)
+  deg_free <- c(deg_free, test_results[[i]]$parameter)
+}
+
+# Effect size using Cohen's D
+# https://rcompanion.org/handbook/I_03.html
+effect_sizes <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) cohensD(value~stress_group, x)) %>%
+  as_vector()
+
+# Get LIWC vars names
+variable_names <- names(test_results)
+
+# Add all vectors into df
+test_signf_results <- data.frame(variable_names, t_stat, deg_free, effect_sizes, p_val) %>%
+  as_tibble() %>%
+  # Set Bonferroni value and determine if p_val is beyond/more extreme
+  mutate(bonf_value = bonf_value) %>%
+  mutate(signf_at_bonf = p_val < bonf_value) %>%
+  # Keep only significant differences
+  filter(signf_at_bonf == TRUE)
+test_signf_results
+
+# Save data to csv
+write_csv(test_signf_results, "results/group_comparisons/label_StressCT.csv")
+
+# ......3a) Perceived Stress ------------------------------------
+
+# Filter the data
+cmips_groups_long <- cmips_groups %>%
+  select(label_PSS_total, starts_with("fmean")) %>%
+  rename(stress_group = label_PSS_total) %>%
+  pivot_longer(cols = starts_with("fmean"), names_to = "variable", values_to = "value")
+
+# Execute the independent samples t-tests w/o variance equality assumption
+test_results <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) t.test(value~stress_group, x))
+print(test_results)
+
+# Bonferroni correction value
+bonf_value <- 0.05 / length(names(test_results))
+
+# Extract data from list into df, next few lines
+
+# Prepare vectors
+t_stat <- c()
+p_val <- c()
+deg_free <- c()
+
+# For loop to extract data
+for (i in 1:length(names(test_results))) {
+  t_stat <- c(t_stat, test_results[[i]]$statistic)
+  p_val <- c(p_val, test_results[[i]]$p.value)
+  deg_free <- c(deg_free, test_results[[i]]$parameter)
+}
+
+# Effect size using Cohen's D
+# https://rcompanion.org/handbook/I_03.html
+effect_sizes <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) cohensD(value~stress_group, x)) %>%
+  as_vector()
+
+# Get LIWC vars names
+variable_names <- names(test_results)
+
+# Add all vectors into df
+test_signf_results <- data.frame(variable_names, t_stat, deg_free, effect_sizes, p_val) %>%
+  as_tibble() %>%
+  # Set Bonferroni value and determine if p_val is beyond/more extreme
+  mutate(bonf_value = bonf_value) %>%
+  mutate(signf_at_bonf = p_val < bonf_value) %>%
+  # Keep only significant differences
+  filter(signf_at_bonf == TRUE)
+test_signf_results
+
+# Save data to csv
+write_csv(test_signf_results, "results/group_comparisons/label_PSS_total.csv")
+
+# ......3a) Potentially Traumatic Life Events -----------------------------
+
+# Filter the data
+cmips_groups_long <- cmips_groups %>%
+  select(label_LEC_total, starts_with("fmean")) %>%
+  rename(stress_group = label_LEC_total) %>%
+  pivot_longer(cols = starts_with("fmean"), names_to = "variable", values_to = "value")
+
+# Execute the independent samples t-tests w/o variance equality assumption
+test_results <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) t.test(value~stress_group, x))
+print(test_results)
+
+# Bonferroni correction value
+bonf_value <- 0.05 / length(names(test_results))
+
+# Extract data from list into df, next few lines
+
+# Prepare vectors
+t_stat <- c()
+p_val <- c()
+deg_free <- c()
+
+# For loop to extract data
+for (i in 1:length(names(test_results))) {
+  t_stat <- c(t_stat, test_results[[i]]$statistic)
+  p_val <- c(p_val, test_results[[i]]$p.value)
+  deg_free <- c(deg_free, test_results[[i]]$parameter)
+}
+
+# Effect size using Cohen's D
+# https://rcompanion.org/handbook/I_03.html
+effect_sizes <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) cohensD(value~stress_group, x)) %>%
+  as_vector()
+
+# Get LIWC vars names
+variable_names <- names(test_results)
+
+# Add all vectors into df
+test_signf_results <- data.frame(variable_names, t_stat, deg_free, effect_sizes, p_val) %>%
+  as_tibble() %>%
+  # Set Bonferroni value and determine if p_val is beyond/more extreme
+  mutate(bonf_value = bonf_value) %>%
+  mutate(signf_at_bonf = p_val < bonf_value) %>%
+  # Keep only significant differences
+  filter(signf_at_bonf == TRUE)
+test_signf_results
+
+# Save data to csv
+write_csv(test_signf_results, "results/group_comparisons/label_LEC_total.csv")
+
+# ......3a) Prejudiced Events -----------------------------
+
+# Filter the data
+cmips_groups_long <- cmips_groups %>%
+  select(label_DHEQ_mean, starts_with("fmean")) %>%
+  rename(stress_group = label_DHEQ_mean) %>%
+  pivot_longer(cols = starts_with("fmean"), names_to = "variable", values_to = "value")
+
+# Execute the independent samples t-tests w/o variance equality assumption
+test_results <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) t.test(value~stress_group, x))
+print(test_results)
+
+# Bonferroni correction value
+bonf_value <- 0.05 / length(names(test_results))
+
+# Extract data from list into df, next few lines
+
+# Prepare vectors
+t_stat <- c()
+p_val <- c()
+deg_free <- c()
+
+# For loop to extract data
+for (i in 1:length(names(test_results))) {
+  t_stat <- c(t_stat, test_results[[i]]$statistic)
+  p_val <- c(p_val, test_results[[i]]$p.value)
+  deg_free <- c(deg_free, test_results[[i]]$parameter)
+}
+
+# Effect size using Cohen's D
+# https://rcompanion.org/handbook/I_03.html
+effect_sizes <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) cohensD(value~stress_group, x)) %>%
+  as_vector()
+
+# Get LIWC vars names
+variable_names <- names(test_results)
+
+# Add all vectors into df
+test_signf_results <- data.frame(variable_names, t_stat, deg_free, effect_sizes, p_val) %>%
+  as_tibble() %>%
+  # Set Bonferroni value and determine if p_val is beyond/more extreme
+  mutate(bonf_value = bonf_value) %>%
+  mutate(signf_at_bonf = p_val < bonf_value) %>%
+  # Keep only significant differences
+  filter(signf_at_bonf == TRUE)
+test_signf_results
+
+# Save data to csv
+write_csv(test_signf_results, "results/group_comparisons/label_DHEQ_mean.csv")
+
+# ......3a) Identity Concealment -----------------------------
+
+# Filter the data
+cmips_groups_long <- cmips_groups %>%
+  select(label_OI_mean, starts_with("fmean")) %>%
+  rename(stress_group = label_OI_mean) %>%
+  pivot_longer(cols = starts_with("fmean"), names_to = "variable", values_to = "value")
+
+# Execute the independent samples t-tests w/o variance equality assumption
+test_results <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) t.test(value~stress_group, x))
+print(test_results)
+
+# Bonferroni correction value
+bonf_value <- 0.05 / length(names(test_results))
+
+# Extract data from list into df, next few lines
+
+# Prepare vectors
+t_stat <- c()
+p_val <- c()
+deg_free <- c()
+
+# For loop to extract data
+for (i in 1:length(names(test_results))) {
+  t_stat <- c(t_stat, test_results[[i]]$statistic)
+  p_val <- c(p_val, test_results[[i]]$p.value)
+  deg_free <- c(deg_free, test_results[[i]]$parameter)
+}
+
+# Effect size using Cohen's D
+# https://rcompanion.org/handbook/I_03.html
+effect_sizes <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) cohensD(value~stress_group, x)) %>%
+  as_vector()
+
+# Get LIWC vars names
+variable_names <- names(test_results)
+
+# Add all vectors into df
+test_signf_results <- data.frame(variable_names, t_stat, deg_free, effect_sizes, p_val) %>%
+  as_tibble() %>%
+  # Set Bonferroni value and determine if p_val is beyond/more extreme
+  mutate(bonf_value = bonf_value) %>%
+  mutate(signf_at_bonf = p_val < bonf_value) %>%
+  # Keep only significant differences
+  filter(signf_at_bonf == TRUE)
+test_signf_results
+
+# Save data to csv
+write_csv(test_signf_results, "results/group_comparisons/label_OI_mean.csv")
+
+# ......3a) Expected Rejection -----------------------------
+
+# Filter the data
+cmips_groups_long <- cmips_groups %>%
+  select(label_SOER_total, starts_with("fmean")) %>%
+  rename(stress_group = label_SOER_total) %>%
+  pivot_longer(cols = starts_with("fmean"), names_to = "variable", values_to = "value")
+
+# Execute the independent samples t-tests w/o variance equality assumption
+test_results <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) t.test(value~stress_group, x))
+print(test_results)
+
+# Bonferroni correction value
+bonf_value <- 0.05 / length(names(test_results))
+
+# Extract data from list into df, next few lines
+
+# Prepare vectors
+t_stat <- c()
+p_val <- c()
+deg_free <- c()
+
+# For loop to extract data
+for (i in 1:length(names(test_results))) {
+  t_stat <- c(t_stat, test_results[[i]]$statistic)
+  p_val <- c(p_val, test_results[[i]]$p.value)
+  deg_free <- c(deg_free, test_results[[i]]$parameter)
+}
+
+# Effect size using Cohen's D
+# https://rcompanion.org/handbook/I_03.html
+effect_sizes <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) cohensD(value~stress_group, x)) %>%
+  as_vector()
+
+# Get LIWC vars names
+variable_names <- names(test_results)
+
+# Add all vectors into df
+test_signf_results <- data.frame(variable_names, t_stat, deg_free, effect_sizes, p_val) %>%
+  as_tibble() %>%
+  # Set Bonferroni value and determine if p_val is beyond/more extreme
+  mutate(bonf_value = bonf_value) %>%
+  mutate(signf_at_bonf = p_val < bonf_value) %>%
+  # Keep only significant differences
+  filter(signf_at_bonf == TRUE)
+test_signf_results
+
+# Save data to csv
+write_csv(test_signf_results, "results/group_comparisons/label_SOER_total.csv")
+
+# ......3a) Internalized Stigma -----------------------------
+
+# Filter the data
+cmips_groups_long <- cmips_groups %>%
+  select(label_IHS_mean, starts_with("fmean")) %>%
+  rename(stress_group = label_IHS_mean) %>%
+  pivot_longer(cols = starts_with("fmean"), names_to = "variable", values_to = "value")
+
+# Execute the independent samples t-tests w/o variance equality assumption
+test_results <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) t.test(value~stress_group, x))
+print(test_results)
+
+# Bonferroni correction value
+bonf_value <- 0.05 / length(names(test_results))
+
+# Extract data from list into df, next few lines
+
+# Prepare vectors
+t_stat <- c()
+p_val <- c()
+deg_free <- c()
+
+# For loop to extract data
+for (i in 1:length(names(test_results))) {
+  t_stat <- c(t_stat, test_results[[i]]$statistic)
+  p_val <- c(p_val, test_results[[i]]$p.value)
+  deg_free <- c(deg_free, test_results[[i]]$parameter)
+}
+
+# Effect size using Cohen's D
+# https://rcompanion.org/handbook/I_03.html
+effect_sizes <- lapply(split(cmips_groups_long, cmips_groups_long$variable), 
+                       function(x) cohensD(value~stress_group, x)) %>%
+  as_vector()
+
+# Get LIWC vars names
+variable_names <- names(test_results)
+
+# Add all vectors into df
+test_signf_results <- data.frame(variable_names, t_stat, deg_free, effect_sizes, p_val) %>%
+  as_tibble() %>%
+  # Set Bonferroni value and determine if p_val is beyond/more extreme
+  mutate(bonf_value = bonf_value) %>%
+  mutate(signf_at_bonf = p_val < bonf_value) %>%
+  # Keep only significant differences
+  filter(signf_at_bonf == TRUE)
+test_signf_results
+
+# Save data to csv
+write_csv(test_signf_results, "results/group_comparisons/label_IHS_mean.csv")
