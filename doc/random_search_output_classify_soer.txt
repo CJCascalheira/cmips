@@ -13,4 +13,16 @@ Best Index
 
 All Parameters
 
+#############################################################
+TRAINING INFORMATION - RANDOM SEARCH - PCA - DECISION TREE
 
+Best Parameters
+{'criterion': 'gini', 'max_depth': 47}
+
+Best Score
+0.5555555555555556
+
+Best Index
+3
+
+All Parameters

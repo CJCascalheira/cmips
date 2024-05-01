@@ -14,3 +14,19 @@ Best Index
 All Parameters
 
 
+
+#############################################################
+TRAINING INFORMATION - RANDOM SEARCH - PCA - DECISION TREE
+
+Best Parameters
+{'criterion': 'entropy', 'max_depth': 37}
+
+Best Score
+0.5022222222222222
+
+Best Index
+0
+
+All Parameters
+
+

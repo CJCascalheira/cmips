@@ -13,3 +13,18 @@ Best Index
 All Parameters
 
 
+#############################################################
+TRAINING INFORMATION - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 84, 'max_features': 0.6445443859797882, 'n_estimators': 216}
+
+Best Score
+0.5266666666666666
+
+Best Index
+28
+
+All Parameters
+
+

@@ -14,3 +14,19 @@ Best Index
 All Parameters
 
 
+
+#############################################################
+TRAINING INFORMATION - RANDOM SEARCH - PCA - SVC
+
+Best Parameters
+{'C': 0.5112435831333572}
+
+Best Score
+0.5833333333333333
+
+Best Index
+5
+
+All Parameters
+
+

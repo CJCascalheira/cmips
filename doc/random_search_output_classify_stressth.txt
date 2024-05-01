@@ -12,3 +12,19 @@ Best Index
 34
 
 All Parameters
+
+#############################################################
+TRAINING INFORMATION - RANDOM SEARCH - PCA - XGBOOST
+
+Best Parameters
+{'eta': 0.2280036512989959, 'lambda': 6, 'max_depth': 21, 'subsample': 0.624800304395675}
+
+Best Score
+0.7527777777777778
+
+Best Index
+43
+
+All Parameters
+
+

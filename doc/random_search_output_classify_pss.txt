@@ -13,4 +13,18 @@ Best Index
 
 All Parameters
 
+#############################################################
+TRAINING INFORMATION - RANDOM SEARCH - PCA - LOGISTIC REGRESSION
+
+Best Parameters
+{'C': 0.5133473970349852, 'max_iter': 1243, 'penalty': 'l2'}
+
+Best Score
+0.5555555555555556
+
+Best Index
+0
+
+All Parameters
+
 
