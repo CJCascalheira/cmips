@@ -1,0 +1,128 @@
+
+#############################################################
+LIFETIME STRESSOR COUNT - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 48, 'max_features': 0.5919590666199903, 'n_estimators': 131}
+
+Best Score
+-0.16060613719499364
+
+Best Index
+62
+
+All Parameters
+
+
+
+#############################################################
+LIFETIME STRESSOR SEVERITY - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 21, 'max_features': 0.5141393871864869, 'n_estimators': 224}
+
+Best Score
+-0.2335085847201225
+
+Best Index
+16
+
+All Parameters
+
+
+
+#############################################################
+PERCEIVED STRESS - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 94, 'max_features': 0.5583711533515057, 'n_estimators': 165}
+
+Best Score
+-0.06595898636933827
+
+Best Index
+40
+
+All Parameters
+
+
+
+#############################################################
+POTENTIALLY TRAUMATIC LIFE EVENTS - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 14, 'max_features': 0.5783313987709156, 'n_estimators': 139}
+
+Best Score
+-0.2533445500563849
+
+Best Index
+97
+
+All Parameters
+
+
+
+#############################################################
+PREJUDICED EVENTS - RANDOM SEARCH - PCA - ELASTIC NET
+
+Best Parameters
+{'alpha': 0.6256413233388542, 'l1_ratio': 0.6375378098331993, 'max_iter': 566}
+
+Best Score
+-0.21793949609580238
+
+Best Index
+44
+
+All Parameters
+
+
+
+#############################################################
+IDENTITY CONCEALMENT - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 79, 'max_features': 0.6265744964288574, 'n_estimators': 132}
+
+Best Score
+-0.2229715224893317
+
+Best Index
+58
+
+All Parameters
+
+
+
+#############################################################
+EXPECTED REJECTION - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 66, 'max_features': 0.5257594207874666, 'n_estimators': 565}
+
+Best Score
+-0.139027782208075
+
+Best Index
+13
+
+All Parameters
+
+
+
+#############################################################
+INTERNALIZED STIGMA - RANDOM SEARCH - PCA - ELASTIC NET
+
+Best Parameters
+{'alpha': 0.6329894722350858, 'l1_ratio': 0.64708910017459, 'max_iter': 561}
+
+Best Score
+-0.28978392536445874
+
+Best Index
+13
+
+All Parameters
+
+

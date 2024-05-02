@@ -40,4 +40,6 @@ If you use the bot detection tactics (BDTs) in your work, please cite the corres
 16. src/analyze/describe_measures.R
 17. src/analyze/ml_modeling/classify_*.py
 18. src/analyze/ml_modeling/regress_*.py
-
+19. src/analyze/feature_selection/pca_*
+20. src/analyze/feature_selection/feature_selection.py
+21. src/analyze/feature_selection/top_features.R
