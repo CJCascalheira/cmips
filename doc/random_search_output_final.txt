@@ -1,0 +1,253 @@
+#############################################################
+CLASSIFICATION - LIFETIME STRESSOR COUNT - RANDOM SEARCH - PCA - XGBOOST
+
+Best Parameters
+{'eta': 0.16599099197817904, 'lambda': 5, 'max_depth': 92, 'subsample': 0.5623187233605648}
+
+Best Score
+0.7513888888888889
+
+Best Index
+98
+
+All Parameters
+
+
+#############################################################
+CLASSIFICATION - LIFETIME STRESSOR SEVERITY - RANDOM SEARCH - PCA - XGBOOST
+
+Best Parameters
+{'eta': 0.2589688535596577, 'lambda': 5, 'max_depth': 47, 'subsample': 0.593860473250242}
+
+Best Score
+0.7513888888888889
+
+Best Index
+21
+
+All Parameters
+
+
+#############################################################
+CLASSIFICATION - PREJUDICED EVENTS - RANDOM SEARCH - PCA - XGBOOST
+
+Best Parameters
+{'eta': 0.09894385433227045, 'lambda': 6, 'max_depth': 10, 'subsample': 0.5097871788583676}
+
+Best Score
+0.6155555555555556
+
+Best Index
+16
+
+All Parameters
+
+
+
+#############################################################
+CLASSIFICATION - EXPECTED REJECTION - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 64, 'max_features': 0.5630181739176333, 'n_estimators': 292}
+
+Best Score
+0.5066666666666667
+
+Best Index
+13
+
+All Parameters
+
+
+#############################################################
+CLASSIFICATION - INTERNALIZED STIGMA - RANDOM SEARCH - PCA - DECISION TREE
+
+Best Parameters
+{'criterion': 'entropy', 'max_depth': 45}
+
+Best Score
+0.6544444444444444
+
+Best Index
+1
+
+All Parameters
+
+
+#############################################################
+CLASSIFICATION - PERCEIVED STRESS - RANDOM SEARCH - PCA - XGBOOST
+
+Best Parameters
+{'eta': 0.24370586709861913, 'lambda': 2, 'max_depth': 85, 'subsample': 0.6224753914414246}
+
+Best Score
+0.6677777777777778
+
+Best Index
+77
+
+All Parameters
+
+
+
+#############################################################
+CLASSIFICATION - POTENTIALLY TRAUMATIC LIFE EVENTS - RANDOM SEARCH - PCA - LOGISTIC REGRESSION
+
+Best Parameters
+{'C': 0.5463653256954328, 'max_iter': 821, 'penalty': 'l2'}
+
+Best Score
+0.5566666666666668
+
+Best Index
+0
+
+All Parameters
+
+
+
+#############################################################
+CLASSIFICATION - IDENTITY CONCEALMENT - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 86, 'max_features': 0.5117411781714363, 'n_estimators': 359}
+
+Best Score
+0.6066666666666667
+
+Best Index
+61
+
+All Parameters
+
+
+
+
+
+#############################################################
+REGRESSION - EXPECTED REJECTION - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 63, 'max_features': 0.5696015263849666, 'n_estimators': 122}
+
+Best Score
+-0.13132860823235923
+
+Best Index
+76
+
+All Parameters
+
+
+
+#############################################################
+REGRESSION - LIFETIME STRESSOR COUNT - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 72, 'max_features': 0.5571488800305328, 'n_estimators': 324}
+
+Best Score
+-0.16036067466300236
+
+Best Index
+98
+
+All Parameters
+
+
+
+#############################################################
+REGRESSION - LIFETIME STRESSOR SEVERITY - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 28, 'max_features': 0.538180905527595, 'n_estimators': 284}
+
+Best Score
+-0.23695671871102095
+
+Best Index
+19
+
+All Parameters
+
+
+
+#############################################################
+REGRESSION - PERCEIVED STRESS - RANDOM SEARCH - PCA - XGBOOST
+
+Best Parameters
+{'eta': 0.5276098469657554, 'max_depth': 29, 'n_estimators': 277, 'subsample': 0.5677888025384356}
+
+Best Score
+-0.4157242096537157
+
+Best Index
+76
+
+All Parameters
+
+
+
+#############################################################
+REGRESSION - POTENTIALLY TRAUMATIC LIFE EVENTS - RANDOM SEARCH - PCA - RIDGE REGRESSION
+
+Best Parameters
+{'alpha': 0.6499344899146825, 'max_iter': 1061}
+
+Best Score
+-0.2465521543290814
+
+Best Index
+44
+
+All Parameters
+
+
+
+#############################################################
+REGRESSION - PREJUDICED EVENTS - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 22, 'max_features': 0.5211175711876463, 'n_estimators': 101}
+
+Best Score
+-0.11050565649761301
+
+Best Index
+98
+
+All Parameters
+
+
+
+#############################################################
+REGRESSION - IDENTITY CONCEALMENT - RANDOM SEARCH - PCA - RANDOM FOREST
+
+Best Parameters
+{'max_depth': 87, 'max_features': 0.5470374899198611, 'n_estimators': 527}
+
+Best Score
+-0.06554117133953681
+
+Best Index
+19
+
+All Parameters
+
+
+
+#############################################################
+REGRESSION - INTERNALIZED STIGMA - RANDOM SEARCH - PCA - ELASTIC NET
+
+Best Parameters
+{'alpha': 0.5384205455201654, 'l1_ratio': 0.633333794769361, 'max_iter': 1336}
+
+Best Score
+-0.21128405039846795
+
+Best Index
+0
+
+All Parameters
+
+

@@ -124,7 +124,7 @@ ci.reliability(data = cmips_int_con, type = "omega", conf.level = 0.95,
 alpha(cmips_int_con)
 omega(cmips_int_con)
 
-# CORRELATION TABLES AND DESCRIPTIVE STATS --------------------------------
+# DESCRIPTIVE STATS -------------------------------------------------------
 
 # How many participants said they post about stressful exps on social media?
 cmips_surveys %>%
@@ -188,6 +188,103 @@ kurtosi(cmips_surveys$BSMAS_total) /  KurtosisSE(cmips_surveys$BSMAS_total)
 kurtosi(cmips_surveys$SMBS_total) /  KurtosisSE(cmips_surveys$SMBS_total)
 kurtosi(cmips_surveys$CLCS_total) /  KurtosisSE(cmips_surveys$CLCS_total)
 
+# HISTOGRAMS --------------------------------------------------------------
+
+cmips_surveys %>%
+  ggplot(aes(x = StressCT)) +
+  geom_histogram(fill = "steelblue") +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_bw() + 
+  theme(text = element_text(family = "serif", size = 16)) +
+  labs(
+    x = "Lifetime Stressor Count",
+    y = "Count"
+  )
+
+cmips_surveys %>%
+  ggplot(aes(x = StressTH)) +
+  geom_histogram(fill = "steelblue") +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_bw() + 
+  theme(text = element_text(family = "serif", size = 16)) +
+  labs(
+    x = "Lifetime Stressor Severity",
+    y = "Count"
+  )
+
+cmips_surveys %>%
+  ggplot(aes(x = PSS_total)) +
+  geom_histogram(fill = "steelblue") +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_bw() + 
+  theme(text = element_text(family = "serif", size = 16)) +
+  labs(
+    x = "Perceived Stress",
+    y = "Count"
+  )
+
+cmips_surveys %>%
+  ggplot(aes(x = LEC_total)) +
+  geom_histogram(fill = "steelblue") +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_bw() + 
+  theme(text = element_text(family = "serif", size = 16)) +
+  labs(
+    x = "Potentially Traumatic Life Events",
+    y = "Count"
+  )
+
+cmips_surveys %>%
+  ggplot(aes(x = DHEQ_mean)) +
+  geom_histogram(fill = "steelblue") +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_bw() + 
+  theme(text = element_text(family = "serif", size = 16)) +
+  labs(
+    x = "Prejudiced Events",
+    y = "Count"
+  )
+
+cmips_surveys %>%
+  ggplot(aes(x = OI_mean)) +
+  geom_histogram(fill = "steelblue") +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_bw() + 
+  theme(text = element_text(family = "serif", size = 16)) +
+  labs(
+    x = "Identity Concealment",
+    y = "Count"
+  )
+
+cmips_surveys %>%
+  ggplot(aes(x = SOER_total)) +
+  geom_histogram(fill = "steelblue") +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_bw() + 
+  theme(text = element_text(family = "serif", size = 16)) +
+  labs(
+    x = "Expected Rejection",
+    y = "Count"
+  )
+
+cmips_surveys %>%
+  ggplot(aes(x = IHS_mean)) +
+  geom_histogram(fill = "steelblue") +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_bw() + 
+  theme(text = element_text(family = "serif", size = 16)) +
+  labs(
+    x = "Internalized Stigma",
+    y = "Count"
+  )
 # CLASS BALANCE OF OUTCOMES -----------------------------------------------
 
 table(cmips_surveys$label_StressTH)

@@ -84,7 +84,7 @@ my_metrics = {'accuracy', 'precision', 'recall', 'f1', 'roc_auc'}
 
 #######################################################################################################################
 
-# region
+# region PCA
 
 # Initialize PCA and keep 95% of the variance
 pca = PCA(n_components=0.95)

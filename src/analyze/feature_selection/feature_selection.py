@@ -102,7 +102,7 @@ for i in range(len(cmips_x.columns)):
         # Append number of bins to list
         n_bins.append(my_n_bins)
 
-# Transform to features into matrices
+# Transform features into matrices
 cmips_x = cmips_x.values
 
 # Discretize the data

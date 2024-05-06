@@ -357,6 +357,8 @@ print('Average recall: %.3f (%.3f)' % (np.mean(scores_dt['test_recall']), np.std
 print('Average F1: %.3f (%.3f)' % (np.mean(scores_dt['test_f1']), np.std(scores_dt['test_f1'])))
 print('Average ROC AUC: %.3f (%.3f)' % (np.mean(scores_dt['test_roc_auc']), np.std(scores_dt['test_roc_auc'])))
 
+# endregion
+
 # region HYPERPARAMETER TUNING - RANDOM SEARCH - SVM - Internalized Stigma
 
 # Create the parameter search space

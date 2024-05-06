@@ -43,3 +43,4 @@ If you use the bot detection tactics (BDTs) in your work, please cite the corres
 19. src/analyze/feature_selection/pca_*
 20. src/analyze/feature_selection/feature_selection.py
 21. src/analyze/feature_selection/top_features.R
+22. src/analyze/features_survey_predictors/*
